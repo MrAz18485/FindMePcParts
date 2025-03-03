@@ -8,8 +8,8 @@ Cem Özbaş 34453
 Doğukan Doğan 31053  
 Furkan Emre Babadağ 32237  
 Kerem Tufan 32554  
-**Main Purpose:** Finding parts at affordable prices and making sure they are compatible with each other when building your PC is a problem. Our application aims to solve these problems.  
-**Target Audience:** Consumers and PC enthusiasts that are building their own PCs, especially ones in Turkey and neighboring regions where existing PC part compatibility and pricing applications provide limited or no support.  
+**Main Purpose:**  Finding parts at affordable prices and making sure they are compatible with each other when building your PC is a problem. Our application aims to solve these problems.  
+**Target Audience:**  Consumers and PC enthusiasts that are building their own PCs, especially ones in Turkey and neighboring regions where existing PC part compatibility and pricing applications provide limited or no support.  
 **Key Features:**  
   - Users can register to the application for saving their PC builds and receiving notifications when products that are out of stock are available.  
   - Supports comparison of the price of a specific part (like processor, for example) among multiple websites.  
