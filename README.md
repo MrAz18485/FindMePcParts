@@ -1,6 +1,6 @@
 # CS310-Project
 
-* Application Name: FindMePcParts
+* **Application Name:** FindMePcParts
 
 * **Group Members (Name, ID):**  
   Ahmet Bilgili 34391  
