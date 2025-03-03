@@ -2,7 +2,7 @@
 
 Application Name: FindMePcParts
 
-*Group Members (Name, ID):
+* Group Members (Name, ID):
   Ahmet Bilgili 34391
   Aziz Derin Ebil 34332
   Cem Özbaş 34453 
