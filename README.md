@@ -3,12 +3,12 @@
 **Application Name:** FindMePcParts  
 
 **Group Members (Name, ID):**  
-  *Ahmet Bilgili 34391  
-  *Aziz Derin Ebil 34332  
-  *Cem Özbaş 34453  
-  *Doğukan Doğan 31053  
-  *Furkan Emre Babadağ 32237  
-  *Kerem Tufan 32554  
+  * Ahmet Bilgili 34391  
+  * Aziz Derin Ebil 34332  
+  * Cem Özbaş 34453  
+  * Doğukan Doğan 31053  
+  * Furkan Emre Babadağ 32237  
+  * Kerem Tufan 32554  
 
 **Main Purpose:**  Finding parts at affordable prices and making sure they are compatible with each other when building your PC is a problem. Our application aims to solve these problems.  
 
