@@ -10,11 +10,11 @@ Application Name: FindMePcParts
   Furkan Emre Babadağ 32237
   Kerem Tufan 32554
   
-* Main Purpose
+* Main Purpose:  
   Finding parts at affordable prices and making sure they are compatible with each other when building your PC is a problem. Our application aims to solve these problems.
-* Target Audience:
+* Target Audience:  
   Consumers that are building their own PCs, especially ones in Turkey and neighboring regions which are not supported by other applications.
-* Key Features:
+* Key Features:  
   - Users can register to the application for saving their PC builds and receiving notifications when products that are out of stock are available.
   - Supports comparison of the price of a specific part (like processor, for example) among multiple websites while also giving valuable insight about used alternatives of the product.
   - Comes with an easy-to-navigate UI and user-friendly UX
