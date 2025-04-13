@@ -30,10 +30,10 @@ class Buildcard extends StatelessWidget
                     SizedBox(height: 10,),
                     Text(userbuild.buildname, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
                     SizedBox(height: 3,),
-                    Text(userbuild.components.toString().substring(1, userbuild.components.toString().length - 1), style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                    Text(userbuild.partsstring.toString().substring(1, userbuild.partsstring.toString().length - 1), style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
                     SizedBox(height: 20,),
                     ElevatedButton(onPressed: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => PartPage(BuildName: userbuild.buildname, parts: userparts,)));
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => PartPage(BuildName: userbuild.buildname, parts: userbuild.parts,)));
                     }, style: ElevatedButton.styleFrom(backgroundColor: Colors.black, foregroundColor: Colors.white,), child: Text("View")),
                   ]
                 ),
@@ -53,11 +53,12 @@ class PartCard extends StatefulWidget {
 
 class _PartCardState extends State<PartCard> 
 {
-  List<Widget> _cardInfoWidgets = [];
+  bool pressed = false;
+  List<Part> _partInfoWidget = [];
 
-  void _addNewWidget(Column widgetToAdd) {
+  void _addNewPart(Part partToAdd) {
     setState(() {
-      _cardInfoWidgets.add(widgetToAdd);
+      _partInfoWidget.add(partToAdd);
       print("Added widget!");
     });
   }
@@ -65,7 +66,6 @@ class _PartCardState extends State<PartCard>
   @override
   Widget build(BuildContext context)
   {
-    bool pressed = false;
     return Card(
       color: Colors.white,
       shape: RoundedRectangleBorder(side:BorderSide(color: Colors.black),
@@ -90,37 +90,47 @@ class _PartCardState extends State<PartCard>
               Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  TextButton(onPressed: () {},
-                  style: TextButton.styleFrom(backgroundColor: Colors.white), child: Text(""))
+                  TextButton(onPressed: () {
+                    setState(() {
+                      _addNewPart(Part(partname: widget.CurrentPart.partname, partcategory: widget.CurrentPart.partcategory, partprice: widget.CurrentPart.partprice));
+                      pressed = !pressed;
+                    });
+                  },
+                  style: TextButton.styleFrom(backgroundColor: Colors.white), child: Icon(pressed ? FontAwesomeIcons.arrowUp: FontAwesomeIcons.arrowDown, color: Colors.black,))
                 ]
-              )
+              ),
+              if (_partInfoWidget.length == 1)
+                infoPart(_partInfoWidget[0]),
             ],
           ),
-          Card(
-            color: Colors.white,
-            elevation: 0,
-            child: 
-                Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset('assets/placeholder.png', height: 120, width: 120,),
-                      SizedBox(height: 5,),
-                      Text(widget.CurrentPart.partname, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
-                      SizedBox(height: 5,),
-                      Text(widget.CurrentPart.partprice.toInt().toString(), style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
-                      Row(children: [
-                        Spacer(),
-                        TextButton(onPressed: () {}, child: Icon(FontAwesomeIcons.trashCan))
-                      ],)
-                    ],
-                  )
-            ) 
         ]
       ),
     );
   }
 }
 
+Card infoPart(Part CP)
+{
+  return Card(
+          color: Colors.white,
+          elevation: 0,
+          child: 
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset('assets/placeholder.png', height: 120, width: 120,),
+                SizedBox(height: 5,),
+                Text(CP.partname, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+                SizedBox(height: 5,),
+                Text(CP.partprice.toInt().toString(), style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+                Row(children: [
+                  Spacer(),
+                    TextButton(onPressed: () {}, child: Icon(FontAwesomeIcons.trashCan))
+                ],)
+              ],
+            )
+        );
+}
 
 // add a child like this.
 /*

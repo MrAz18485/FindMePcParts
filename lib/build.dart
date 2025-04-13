@@ -1,7 +1,8 @@
 class Build {
   String buildname;
-  List<String> components;
-  Build({required this.buildname, required this.components});
+  List<String> partsstring;
+  List<Part> parts;
+  Build({required this.buildname, required this.partsstring, required this.parts });
 }
 
 class Part {

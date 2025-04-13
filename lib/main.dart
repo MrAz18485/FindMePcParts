@@ -65,15 +65,14 @@ List<Product> products =  [
 
 
 List<Build> builds = [
-  Build(buildname: "Build 1", components: ["Intel Core i5 750", "GeForce RTX 4060", "Kingston 8 GB 1333 Mhz RAM"]),
-  Build(buildname: "Build 2", components: ["Intel Core i7"])
-];
-
-
-List<Part> userparts = [
-  Part(partname: "Intel Core i5 750", partcategory: "Processor(CPU)", partprice: 15),
-  Part(partname: "GeForce RTX 4060", partcategory: "Graphics Card(GPU)", partprice: 350),
-  Part(partname: "Kingston 8 GB 1333 Mhz RAM", partcategory: "Physical Memory(RAM)", partprice: 30),
+  Build(buildname: "Build 1", partsstring: ["Intel Core i5 750", "GeForce RTX 4060", "Kingston 8 GB 1333 Mhz RAM"], parts: [
+    Part(partname: "Intel Core i5 750", partcategory: "Processor(CPU)", partprice: 15),
+    Part(partname: "GeForce RTX 4060", partcategory: "Graphics Card(GPU)", partprice: 350),
+    Part(partname: "Kingston 8 GB 1333 Mhz RAM", partcategory: "Physical Memory(RAM)", partprice: 30)
+  ]),
+  Build(buildname: "Build 2", partsstring: ["Intel Core i7"], parts: [
+    Part(partname: "Intel Core i7", partcategory: "Processor(CPU)", partprice: 150)
+  ])
 ];
 
 void main() {
