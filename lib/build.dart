@@ -7,5 +7,6 @@ class Build {
 class Part {
   String partname;
   String partcategory;
-  Part({required this.partname, required this.partcategory});
+  int partprice;
+  Part({required this.partname, required this.partcategory, this.partprice = 0});
 }

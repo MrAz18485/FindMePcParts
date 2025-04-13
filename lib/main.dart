@@ -71,9 +71,9 @@ List<Build> builds = [
 
 
 List<Part> userparts = [
-  Part(partname: "Intel Core i5 750", partcategory: "Processor(CPU)"),
-  Part(partname: "GeForce RTX 4060", partcategory: "Graphics Card(GPU)"),
-  Part(partname: "Kingston 8 GB 1333 Mhz RAM", partcategory: "Physical Memory(RAM)"),
+  Part(partname: "Intel Core i5 750", partcategory: "Processor(CPU)", partprice: 15),
+  Part(partname: "GeForce RTX 4060", partcategory: "Graphics Card(GPU)", partprice: 350),
+  Part(partname: "Kingston 8 GB 1333 Mhz RAM", partcategory: "Physical Memory(RAM)", partprice: 30),
 ];
 
 void main() {
@@ -187,10 +187,11 @@ class PartPage extends StatelessWidget {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [Text(BuildName, style: TextStyle(fontSize: 40),)]
-            ),
+            Expanded(
+              child: Row(
+                children: [Text(BuildName, style: TextStyle(fontSize: 40),), Spacer(), TextButton(onPressed: () {}, child: Icon(FontAwesomeIcons.plus, color: Colors.black, size: 30,))]
+              ),
+            )
           ]
         )
       ),

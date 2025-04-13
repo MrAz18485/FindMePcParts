@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:findmepcparts/build.dart';
 import 'package:findmepcparts/main.dart';
-import 'dart:io';
 
 class Buildcard extends StatelessWidget 
 {
@@ -54,47 +53,89 @@ class PartCard extends StatefulWidget {
 
 class _PartCardState extends State<PartCard> 
 {
+  List<Widget> _cardInfoWidgets = [];
+
+  void _addNewWidget(Column widgetToAdd) {
+    setState(() {
+      _cardInfoWidgets.add(widgetToAdd);
+      print("Added widget!");
+    });
+  }
+
   @override
   Widget build(BuildContext context)
   {
+    bool pressed = false;
     return Card(
       color: Colors.white,
       shape: RoundedRectangleBorder(side:BorderSide(color: Colors.black),
         borderRadius: BorderRadius.circular(5),),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: Column( 
         children: [
-          Expanded(
-            child:
-              Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Text(widget.CurrentPart.partname, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
-                  SizedBox(height: 10,),
-                  Text(widget.CurrentPart.partcategory, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
-                ],
-              ), 
-          ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.end,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-            TextButton(onPressed: () {
+              Expanded(
+                child: 
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text(widget.CurrentPart.partname, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+                      SizedBox(height: 5,),
+                      Text(widget.CurrentPart.partcategory, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+                      SizedBox(height: 5,),
+                    ],
+                  ), 
+              ),
               Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Image.file(File('placeholder.png')),
-                  SizedBox(height: 5,),
-                  Text(widget.CurrentPart.partname, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
-                  SizedBox(height: 5,),
-                  Text(widget.CurrentPart.partcategory, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
-                  Row(children: [],)
-                ],
-              );
-            }, style: ElevatedButton.styleFrom(backgroundColor: Colors.white), child: Icon(Icons.arrow_downward_rounded, color: Colors.black,))            
-            ],)
-        ],
+                  TextButton(onPressed: () {},
+                  style: TextButton.styleFrom(backgroundColor: Colors.white), child: Text(""))
+                ]
+              )
+            ],
+          ),
+          Card(
+            color: Colors.white,
+            elevation: 0,
+            child: 
+                Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.asset('assets/placeholder.png', height: 120, width: 120,),
+                      SizedBox(height: 5,),
+                      Text(widget.CurrentPart.partname, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+                      SizedBox(height: 5,),
+                      Text(widget.CurrentPart.partprice.toInt().toString(), style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+                      Row(children: [
+                        Spacer(),
+                        TextButton(onPressed: () {}, child: Icon(FontAwesomeIcons.trashCan))
+                      ],)
+                    ],
+                  )
+            ) 
+        ]
       ),
     );
   }
 }
 
+
+// add a child like this.
+/*
+                  _addNewWidget(
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Image.asset('assets/placeholder.png'),
+                      SizedBox(height: 5,),
+                      Text(widget.CurrentPart.partname, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+                      SizedBox(height: 5,),
+                      Text(widget.CurrentPart.partcategory, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+                      Row(children: [
+                        TextButton(onPressed: () {}, child: Icon(FontAwesomeIcons.trashCan))
+                      ],)
+                    ],
+                  ));
+*/
