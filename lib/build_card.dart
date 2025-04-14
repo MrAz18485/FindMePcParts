@@ -54,12 +54,19 @@ class PartCard extends StatefulWidget {
 class _PartCardState extends State<PartCard> 
 {
   bool pressed = false;
-  List<Part> _partInfoWidget = [];
+  List<Card> Cards = [];
 
-  void _addNewPart(Part partToAdd) {
+  void _addNewPart(Card CurrentCard) {
     setState(() {
-      _partInfoWidget.add(partToAdd);
+      Cards.add(CurrentCard);
       print("Added widget!");
+    });
+  }
+
+  void _removePart() {
+    setState(() {
+      Cards.remove(Cards[0]);
+      print("Removed widget!");
     });
   }
 
@@ -92,17 +99,31 @@ class _PartCardState extends State<PartCard>
                 children: [
                   TextButton(onPressed: () {
                     setState(() {
-                      _addNewPart(Part(partname: widget.CurrentPart.partname, partcategory: widget.CurrentPart.partcategory, partprice: widget.CurrentPart.partprice));
+                      if (!pressed)
+                      {
+                        _addNewPart(infoPart(widget.CurrentPart));
+                      }
+                      if (pressed)
+                      {
+                        _removePart();
+                      }
                       pressed = !pressed;
+                      /*
+                      for (int i = 0; i < Cards.length; i++)
+                      {
+                        print(Cards[i]);
+                      }
+                      */
                     });
                   },
                   style: TextButton.styleFrom(backgroundColor: Colors.white), child: Icon(pressed ? FontAwesomeIcons.arrowUp: FontAwesomeIcons.arrowDown, color: Colors.black,))
                 ]
               ),
-              if (_partInfoWidget.length == 1)
-                infoPart(_partInfoWidget[0]),
+
             ],
           ),
+          for (int i = 0; i < Cards.length; i++)
+            Cards[i]
         ]
       ),
     );
@@ -122,11 +143,18 @@ Card infoPart(Part CP)
                 SizedBox(height: 5,),
                 Text(CP.partname, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
                 SizedBox(height: 5,),
-                Text(CP.partprice.toInt().toString(), style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                  Icon(FontAwesomeIcons.dollarSign),
+                  Text(CP.partprice.toInt().toString(), style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500)),
+                ],)
+                /*
                 Row(children: [
                   Spacer(),
                     TextButton(onPressed: () {}, child: Icon(FontAwesomeIcons.trashCan))
                 ],)
+                */
               ],
             )
         );
