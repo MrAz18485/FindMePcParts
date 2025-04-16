@@ -66,12 +66,12 @@ List<Product> products =  [
 
 List<Build> builds = [
   Build(buildname: "Build 1", partsstring: ["Intel Core i5 750", "GeForce RTX 4060", "Kingston 8 GB 1333 Mhz RAM"], parts: [
-    Part(partname: "Intel Core i5 750", partcategory: "Processor(CPU)", partprice: 15),
-    Part(partname: "GeForce RTX 4060", partcategory: "Graphics Card(GPU)", partprice: 350),
-    Part(partname: "Kingston 8 GB 1333 Mhz RAM", partcategory: "Physical Memory(RAM)", partprice: 30)
+    Part(partname: "Intel Core i5 750", partcategory: "Processor(CPU)", partprice: 15, imageURL: 'assets/i5_750.jpg'),
+    Part(partname: "GeForce RTX 4060", partcategory: "Graphics Card(GPU)", partprice: 350, imageURL: 'assets/4060.jpg'),
+    Part(partname: "Kingston 8 GB 1333 Mhz RAM", partcategory: "Physical Memory(RAM)", partprice: 30, imageURL: 'assets/ram.jpg')
   ]),
-  Build(buildname: "Build 2", partsstring: ["Intel Core i7"], parts: [
-    Part(partname: "Intel Core i7", partcategory: "Processor(CPU)", partprice: 150)
+  Build(buildname: "Build 2", partsstring: ["Intel Core i7 13700"], parts: [
+    Part(partname: "Intel Core i7 13700", partcategory: "Processor(CPU)", partprice: 150, imageURL: 'assets/i7_13700.jpg')
   ])
 ];
 
@@ -88,8 +88,48 @@ void main() {
   ));
 }
 
-class OnSale extends StatelessWidget{
+class SplashScreen extends StatelessWidget {
+  const SplashScreen({super.key});
 
+  @override
+  Widget build(BuildContext context) {
+    Future.delayed(const Duration(seconds: 2), () {
+      Navigator.pushReplacementNamed(context, '/welcome');
+    });
+
+    return Scaffold(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.black87, Colors.brown],
+          ),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset("assets/goblin.png", width: 150, height: 150),
+              const SizedBox(height: 20),
+              const Text(
+                "PC GOBLIN",
+                style: TextStyle(
+                  fontSize: 28,
+                  color: Colors.white,
+                  fontStyle: FontStyle.italic,
+                  fontWeight: FontWeight.w300,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class OnSale extends StatelessWidget{
   const OnSale({super.key});
   @override
   Widget build(BuildContext context){
@@ -205,6 +245,11 @@ class PartPage extends StatelessWidget {
               Column(
                 children: parts.map((card) => PartCard(CurrentPart: card,)).toList()
               ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(onPressed: () {}, child: Icon(FontAwesomeIcons.trashCan, color: Colors.black, size: 25,))
+              ],)
             ]
           ),
         ) 

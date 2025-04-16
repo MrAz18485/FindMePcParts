@@ -59,14 +59,14 @@ class _PartCardState extends State<PartCard>
   void _addNewPart(Card CurrentCard) {
     setState(() {
       Cards.add(CurrentCard);
-      print("Added widget!");
+      // print("Added widget!");
     });
   }
 
   void _removePart() {
     setState(() {
       Cards.remove(Cards[0]);
-      print("Removed widget!");
+      // print("Removed widget!");
     });
   }
 
@@ -108,12 +108,6 @@ class _PartCardState extends State<PartCard>
                         _removePart();
                       }
                       pressed = !pressed;
-                      /*
-                      for (int i = 0; i < Cards.length; i++)
-                      {
-                        print(Cards[i]);
-                      }
-                      */
                     });
                   },
                   style: TextButton.styleFrom(backgroundColor: Colors.white), child: Icon(pressed ? FontAwesomeIcons.arrowUp: FontAwesomeIcons.arrowDown, color: Colors.black,))
@@ -139,7 +133,7 @@ Card infoPart(Part CP)
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Image.asset('assets/placeholder.png', height: 120, width: 120,),
+                Image.asset(CP.imageURL, height: 120, width: 120,),
                 SizedBox(height: 5,),
                 Text(CP.partname, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
                 SizedBox(height: 5,),
@@ -149,31 +143,7 @@ Card infoPart(Part CP)
                   Icon(FontAwesomeIcons.dollarSign),
                   Text(CP.partprice.toInt().toString(), style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500)),
                 ],)
-                /*
-                Row(children: [
-                  Spacer(),
-                    TextButton(onPressed: () {}, child: Icon(FontAwesomeIcons.trashCan))
-                ],)
-                */
               ],
             )
         );
 }
-
-// add a child like this.
-/*
-                  _addNewWidget(
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Image.asset('assets/placeholder.png'),
-                      SizedBox(height: 5,),
-                      Text(widget.CurrentPart.partname, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
-                      SizedBox(height: 5,),
-                      Text(widget.CurrentPart.partcategory, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
-                      Row(children: [
-                        TextButton(onPressed: () {}, child: Icon(FontAwesomeIcons.trashCan))
-                      ],)
-                    ],
-                  ));
-*/

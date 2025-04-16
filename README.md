@@ -1,16 +1,34 @@
-# findmepcparts
+# CS310-Project
 
-A new Flutter project.
+**Application Name:** FindMePcParts  
 
-## Getting Started
+**Group Members (Name, ID):**  
+  * Ahmet Bilgili 34391  
+  * Aziz Derin Ebil 34332  
+  * Cem Özbaş 34453  
+  * Doğukan Doğan 31053  
+  * Furkan Emre Babadağ 32237  
+  * Kerem Tufan 32554  
 
-This project is a starting point for a Flutter application.
+**Main Purpose:**  Finding parts at affordable prices and making sure they are compatible with each other when building your PC is a problem. Our application aims to solve these problems.  
 
-A few resources to get you started if this is your first Flutter project:
+**Target Audience:**  Consumers and PC enthusiasts that are building their own PCs, especially ones in Turkey and neighboring regions where existing PC part compatibility and pricing applications provide limited or no support.  
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+**Key Features:**  
+  - Users can register to the application for saving their PC builds and receiving notifications when products that are out of stock are available.  
+  - Supports comparison of the price of a specific part (like processor, for example) among multiple websites.  
+  - Informs the user when there’s incompatibility between parts.  
+  - Has a built-in forum where users can discuss new computer parts and their experiences.  
+  - Supports advanced sorting & filtering options.  
+  - Capable of giving information about the performance of the builds made by the user with the help of embedded AI  
+  - Comes with an easy-to-navigate UI and user-friendly UX  
+  - Supports Turkey region  
+  - Language support for Turkish & English
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+**Platform:** Android  
+
+**Data Storage:** We will store the computer parts users choose and the computer builds they make. Also, built-in forum discussions will be stored. We are planning to use Firebase.  
+
+**Unique Selling Point:** Websites like PcPartPicker exist, however they don’t support the Turkey region and they don’t provide information about second-hand (i.e. used) parts. Our application will support both features, while also supporting AI-powered suggestions which gives us an edge over other competitors.  
+
+**Challenges:** Fetching data related to parts from manufacturers’ websites, checking the support between the parts and keeping up-to-date with the technology market.  

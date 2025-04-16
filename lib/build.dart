@@ -9,5 +9,6 @@ class Part {
   String partname;
   String partcategory;
   int partprice;
-  Part({required this.partname, required this.partcategory, this.partprice = 0});
+  String imageURL;
+  Part({required this.partname, required this.partcategory, this.partprice = 0, this.imageURL = 'assets/placeholder.png'});
 }
