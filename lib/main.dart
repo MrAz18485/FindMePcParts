@@ -1,9 +1,9 @@
 import 'package:findmepcparts/build.dart';
-import 'package:findmepcparts/build_card.dart';
-import 'package:findmepcparts/login_screens.dart';
+import 'package:findmepcparts/routes/build_card.dart';
+import 'package:findmepcparts/routes/login_screens.dart';
 import 'package:findmepcparts/product.dart';
 import 'package:flutter/material.dart';
-import 'package:findmepcparts/product_card.dart';
+import 'package:findmepcparts/routes/product_card.dart';
 import 'package:findmepcparts/nav_bar.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -88,7 +88,7 @@ void main() {
       '/sales': (context) =>  const OnSale(),
       '/community': (context) => const OnSale(),
       '/settings': (context) =>  const OnSale(),
-      '/builder': (context) =>  const Builds(),
+      '/builder': (context) =>  const BuildPage(),
       '/guides': (context) =>  const OnSale(),
     },
   ));
@@ -173,8 +173,26 @@ class OnSale extends StatelessWidget{
   }
 }
 
-class Builds extends StatelessWidget {
-  const Builds({super.key});
+class BuildPage extends StatefulWidget {
+  const BuildPage({super.key});
+
+  @override
+  State<BuildPage> createState() => _BuildPageState();
+}
+
+class _BuildPageState extends State<BuildPage> {  
+  List<Buildcard> builds_list = [];
+
+  @override
+  @mustCallSuper
+  void initState()
+  {
+    print("Called initstate");
+    for (int i = 0; i < builds.length; i++)
+    {
+      builds_list.add(Buildcard(userbuild: builds[i]));
+    }
+  }
 
   @override
   Widget build(BuildContext context)
@@ -186,8 +204,13 @@ class Builds extends StatelessWidget {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text("Your Builds", style: TextStyle(fontSize: 40),),
-            SizedBox(width: 10,),
+            // Text("Your Builds", style: TextStyle(fontSize: 40),)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text("Your Builds", style: TextStyle(fontSize: 40),),
+              ],
+            ),
             Expanded(
               child: 
                 Row(
@@ -207,7 +230,7 @@ class Builds extends StatelessWidget {
         child: 
         ListView( 
           children: 
-            builds.map((build) => Buildcard(userbuild: build)).toList(),
+            builds_list
         ),
       ),
       bottomNavigationBar: const CustomNavBar(),
@@ -226,6 +249,7 @@ class PartPage extends StatefulWidget {
 class _PartPageState extends State<PartPage> {  
   late List<PartCard> partCards = [];
   late List<TextButton> buttons = [];
+  bool isEmpty = false;
 
   @protected
   @mustCallSuper
@@ -234,14 +258,29 @@ class _PartPageState extends State<PartPage> {
     {
       partCards.add(PartCard(CurrentPart: widget.parts[i]));
     }
-    buttons.add(
-      TextButton(onPressed: () {
-        setState(() {
-          print("Called delete!");
-          partCards.clear();
-          buttons.clear();
-        });
-      }, child: Icon(FontAwesomeIcons.trashCan, color: Colors.black, size: 25,)));
+    if (partCards.isNotEmpty) // if there's AT LEAST one card => there's the build
+    {
+      buttons.add(
+        TextButton(onPressed: () { // trashcan icon
+          setState(() {
+            print("Called delete!");
+            partCards.clear();
+            buttons.clear();
+            isEmpty = true;
+            /*
+            for (int i = 0; i < builds_list.length; i++)
+            {
+              if (builds_list[i].userbuild.buildname == widget.BuildName)
+              {
+                builds_list.removeAt(i);
+              }
+            }
+            */
+            Navigator.pop(context);
+
+          });
+        }, child: Icon(FontAwesomeIcons.trashCan, color: Colors.black, size: 25,)));
+    }
   }
 
   @override
@@ -267,6 +306,7 @@ class _PartPageState extends State<PartPage> {
       Container(
         color: Colors.white,
         child: 
+        isEmpty ? null :
           ListView(
             children: [
               Column(
@@ -279,21 +319,14 @@ class _PartPageState extends State<PartPage> {
                   Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    // buttons[0]
-                    
-                    TextButton(onPressed: () {
-                      setState(() {
-                        print("Called delete!");
-                        partCards.clear();
-                      });
-                    }, child: Icon(FontAwesomeIcons.trashCan, color: Colors.black, size: 25,))
-                    
+                    if (buttons.isNotEmpty)          
+                      buttons[0]
                   ],)
                 ]
               )
             ],
           )
-        ) 
+      )
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:email_validator/email_validator.dart';
 
 class LoginChoiceScreen extends StatelessWidget {
   const LoginChoiceScreen({super.key});
@@ -71,9 +72,25 @@ class SignInScreen extends StatelessWidget {
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
-            TextField(
+            TextFormField(
+              keyboardType: TextInputType.emailAddress,
               controller: emailController,
               decoration: const InputDecoration(labelText: 'Email'),
+              validator: (value)
+              {
+                if (value != null)
+                {
+                  if (value.isEmpty)
+                  {
+                    return "Cannot leave email empty!";
+                  }
+                  if (!EmailValidator.validate(value))
+                  {
+                    return "Not a valid email";
+                  }
+                }
+                return null;
+              }
             ),
             const SizedBox(height: 16),
             TextField(
@@ -108,9 +125,25 @@ class SignUpScreen extends StatelessWidget {
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
-            TextField(
+            TextFormField(
+              keyboardType: TextInputType.emailAddress,
               controller: emailController,
               decoration: const InputDecoration(labelText: 'Email'),
+              validator: (value)
+              {
+                if (value != null)
+                {
+                  if (value.isEmpty)
+                  {
+                    return "Cannot leave email empty!";
+                  }
+                  if (!EmailValidator.validate(value))
+                  {
+                    return "Not a valid email";
+                  }
+                }
+                return null; // no errors, hence null should be returned
+              }
             ),
             const SizedBox(height: 24),
             ElevatedButton(
