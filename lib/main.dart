@@ -1,5 +1,6 @@
 import 'package:findmepcparts/build.dart';
 import 'package:findmepcparts/build_card.dart';
+import 'package:findmepcparts/login_screens.dart';
 import 'package:findmepcparts/product.dart';
 import 'package:flutter/material.dart';
 import 'package:findmepcparts/product_card.dart';
@@ -66,7 +67,7 @@ List<Product> products =  [
 
 List<Build> builds = [
   Build(buildname: "Build 1", partsstring: ["Intel Core i5 750", "GeForce RTX 4060", "Kingston 8 GB 1333 Mhz RAM"], parts: [
-    Part(partname: "Intel Core i5 750", partcategory: "Processor(CPU)", partprice: 15, imageURL: 'assets/i5_750.jpg'),
+    Part(partname: "Intel Core i5 750", partcategory: "Processor(CPU)", partprice: 15),
     Part(partname: "GeForce RTX 4060", partcategory: "Graphics Card(GPU)", partprice: 350, imageURL: 'assets/4060.jpg'),
     Part(partname: "Kingston 8 GB 1333 Mhz RAM", partcategory: "Physical Memory(RAM)", partprice: 30, imageURL: 'assets/ram.jpg')
   ]),
@@ -77,8 +78,13 @@ List<Build> builds = [
 
 void main() {
   runApp(MaterialApp(
-    initialRoute: '/sales',
+    initialRoute: '/splash',
     routes: {
+      '/splash': (context) => const SplashScreen(),
+      '/welcome': (context) => const LoginChoiceScreen(),
+      '/signin': (context) => const SignInScreen(),
+      '/signup': (context) => const SignUpScreen(),
+      '/profileSetup': (context) => const ProfileSetupScreen(),
       '/sales': (context) =>  const OnSale(),
       '/community': (context) => const OnSale(),
       '/settings': (context) =>  const OnSale(),
@@ -209,11 +215,34 @@ class Builds extends StatelessWidget {
   }
 }
 
-
-class PartPage extends StatelessWidget {
+class PartPage extends StatefulWidget {
   final String BuildName;
-  final List<Part> parts;
-  const PartPage({super.key, required this.BuildName, required this.parts});
+  List<Part> parts;
+  PartPage({super.key, required this.BuildName, required this.parts});
+  @override
+  State<PartPage> createState() => _PartPageState();
+}
+
+class _PartPageState extends State<PartPage> {  
+  late List<PartCard> partCards = [];
+  late List<TextButton> buttons = [];
+
+  @protected
+  @mustCallSuper
+  void initState() {
+    for (int i = 0; i < widget.parts.length; i++)
+    {
+      partCards.add(PartCard(CurrentPart: widget.parts[i]));
+    }
+    buttons.add(
+      TextButton(onPressed: () {
+        setState(() {
+          print("Called delete!");
+          partCards.clear();
+          buttons.clear();
+        });
+      }, child: Icon(FontAwesomeIcons.trashCan, color: Colors.black, size: 25,)));
+  }
 
   @override
   Widget build(BuildContext context)
@@ -228,7 +257,7 @@ class PartPage extends StatelessWidget {
           children: [
             Expanded(
               child: Row(
-                children: [Text(BuildName, style: TextStyle(fontSize: 40),), Spacer(), TextButton(onPressed: () {}, child: Icon(FontAwesomeIcons.plus, color: Colors.black, size: 30,))]
+                children: [Text(widget.BuildName, style: TextStyle(fontSize: 40),), Spacer(), TextButton(onPressed: () {}, child: Icon(FontAwesomeIcons.plus, color: Colors.black, size: 30,))]
               ),
             )
           ]
@@ -238,20 +267,32 @@ class PartPage extends StatelessWidget {
       Container(
         color: Colors.white,
         child: 
-          Column(
-            mainAxisAlignment: MainAxisAlignment.start,
+          ListView(
             children: [
-              SizedBox(height: 20,),            
               Column(
-                children: parts.map((card) => PartCard(CurrentPart: card,)).toList()
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(onPressed: () {}, child: Icon(FontAwesomeIcons.trashCan, color: Colors.black, size: 25,))
-              ],)
-            ]
-          ),
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                SizedBox(height: 20,),            
+                  Column(
+                    children: partCards,
+                  ),
+                  Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    // buttons[0]
+                    
+                    TextButton(onPressed: () {
+                      setState(() {
+                        print("Called delete!");
+                        partCards.clear();
+                      });
+                    }, child: Icon(FontAwesomeIcons.trashCan, color: Colors.black, size: 25,))
+                    
+                  ],)
+                ]
+              )
+            ],
+          )
         ) 
     );
   }
