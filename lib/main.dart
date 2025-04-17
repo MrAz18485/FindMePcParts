@@ -7,6 +7,15 @@ import 'package:findmepcparts/routes/product_card.dart';
 import 'package:findmepcparts/nav_bar.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
+
+import 'routes/main_screen.dart';
+import 'routes/settings_screen.dart';
+import 'routes/profile_screen.dart';
+import 'routes/change_details_screen.dart';
+import 'routes/language_screen.dart';
+import 'routes/about_screen.dart';
+import 'package:provider/provider.dart';
+
 List<Product> products =  [
     Product(productName: "Intel Core i5 750 2,6 GHz 8 MB Cache 1156 Pin", price: 643 , percent: 35 ,imageURL: "assets/processor.webp", 
     property:"""
@@ -76,9 +85,15 @@ List<Build> builds = [
   ])
 ];
 
+List<Buildcard> builds_list = [];
+
 void main() {
+  // final themeProvider = Provider.of<ThemeProvider>(context);
   runApp(MaterialApp(
     initialRoute: '/splash',
+    theme: ThemeData.light(),
+    darkTheme: ThemeData.dark(),
+    // themeMode: themeProvider.themeMode,
     routes: {
       '/splash': (context) => const SplashScreen(),
       '/welcome': (context) => const LoginChoiceScreen(),
@@ -87,11 +102,52 @@ void main() {
       '/profileSetup': (context) => const ProfileSetupScreen(),
       '/sales': (context) =>  const OnSale(),
       '/community': (context) => const OnSale(),
-      '/settings': (context) =>  const OnSale(),
+      '/settings': (context) =>  ChangeNotifierProvider(create: (_) => ThemeProvider(), child: const MyApp()),
+      '/profile': (context) => const ProfileScreen(),
+      '/changeDetails': (context) => const ChangeDetailsScreen(),
+      '/about': (context) => const AboutScreen(),
+      '/language': (context) => const LanguageScreen(),
       '/builder': (context) =>  const BuildPage(),
       '/guides': (context) =>  const OnSale(),
     },
   ));
+}
+
+class ThemeProvider extends ChangeNotifier {
+  ThemeMode _themeMode = ThemeMode.system;
+
+  ThemeMode get themeMode => _themeMode;
+  bool get isDarkMode => _themeMode == ThemeMode.dark;
+
+  void toggleTheme(bool isOn) {
+    _themeMode = isOn ? ThemeMode.dark : ThemeMode.light;
+    notifyListeners();
+  }
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
+    return MaterialApp(
+      title: 'PC Goblin',
+      theme: ThemeData.light(),
+      darkTheme: ThemeData.dark(),
+      themeMode: themeProvider.themeMode,
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const MainScreen(),
+        '/settings': (context) => const SettingsScreen(),
+        '/profile': (context) => const ProfileScreen(),
+        '/changeDetails': (context) => const ChangeDetailsScreen(),
+        '/about': (context) => const AboutScreen(),
+        '/language': (context) => const LanguageScreen(),
+      },
+    );
+  }
 }
 
 class SplashScreen extends StatelessWidget {
@@ -181,22 +237,26 @@ class BuildPage extends StatefulWidget {
 }
 
 class _BuildPageState extends State<BuildPage> {  
-  List<Buildcard> builds_list = [];
-
   @override
   @mustCallSuper
   void initState()
   {
     print("Called initstate");
-    for (int i = 0; i < builds.length; i++)
-    {
-      builds_list.add(Buildcard(userbuild: builds[i]));
-    }
   }
 
   @override
   Widget build(BuildContext context)
   {
+    print("Called buildstate!");
+    setState(() {
+      builds_list.clear();
+      for (int i = 0; i < builds.length; i++)
+      {
+        builds_list.add(Buildcard(userbuild: builds[i]));
+        print(builds_list[i].userbuild.partsstring);
+      }
+    });
+    
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: true,
@@ -226,7 +286,6 @@ class _BuildPageState extends State<BuildPage> {
       ),
       body: Container(
         color: Colors.white,
-        // margin: EdgeInsets.fromLTRB(5, 10, 5, 10),
         child: 
         ListView( 
           children: 
@@ -258,6 +317,7 @@ class _PartPageState extends State<PartPage> {
     {
       partCards.add(PartCard(CurrentPart: widget.parts[i]));
     }
+
     if (partCards.isNotEmpty) // if there's AT LEAST one card => there's the build
     {
       buttons.add(
@@ -267,17 +327,18 @@ class _PartPageState extends State<PartPage> {
             partCards.clear();
             buttons.clear();
             isEmpty = true;
-            /*
-            for (int i = 0; i < builds_list.length; i++)
+            print(widget.BuildName);
+            for (int i = 0; i < builds.length; i++)
             {
-              if (builds_list[i].userbuild.buildname == widget.BuildName)
+              print(builds[i].buildname);
+              if (builds[i].buildname == widget.BuildName)
               {
-                builds_list.removeAt(i);
+                builds.removeAt(i);
               }
-            }
-            */
-            Navigator.pop(context);
-
+            }  
+            Navigator.popUntil(context, ModalRoute.withName('/builder')); // pop until builder
+            Navigator.popAndPushNamed(context, '/builder'); // pop builder, replace it with new builder
+            // Navigator.pushNamedAndRemoveUntil(context, '/builder', ModalRoute.withName('/builder'));     
           });
         }, child: Icon(FontAwesomeIcons.trashCan, color: Colors.black, size: 25,)));
     }
