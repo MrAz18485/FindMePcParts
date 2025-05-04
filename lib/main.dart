@@ -1,4 +1,3 @@
-
 import 'package:findmepcparts/routes/guides/guides.dart';
 import 'package:findmepcparts/routes/community/community.dart';
 import 'package:findmepcparts/routes/builder/build_page.dart';
@@ -6,6 +5,9 @@ import 'package:findmepcparts/routes/login_splash/login_screens.dart';
 import 'package:findmepcparts/routes/login_splash/splash.dart';
 
 import 'package:findmepcparts/routes/sales/sales.dart';
+
+import 'package:findmepcparts/firebase_options.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 import 'package:flutter/material.dart';
 
@@ -16,12 +18,17 @@ import 'routes/settings/profile_screen.dart';
 import 'routes/settings/change_details_screen.dart';
 import 'routes/settings/language_screen.dart';
 import 'routes/settings/about_screen.dart';
+import "services/auth_gate.dart";
 
 import 'package:provider/provider.dart';
 
 
-void main() {
-  // final themeProvider = Provider.of<ThemeProvider>(context);
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // don't start app until framework is booted completely
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   runApp(MaterialApp(
     initialRoute: '/splash',
     theme: ThemeData.light(),

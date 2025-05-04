@@ -1,6 +1,8 @@
 import 'package:findmepcparts/util/colors.dart';
 import 'package:findmepcparts/util/text_styles.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+
 import 'package:email_validator/email_validator.dart';
 
 class LoginChoiceScreen extends StatelessWidget {
@@ -58,6 +60,7 @@ class LoginChoiceScreen extends StatelessWidget {
     );
   }
 }
+
 
 class SignInScreen extends StatelessWidget {
   const SignInScreen({super.key});
@@ -123,9 +126,10 @@ class SignInScreen extends StatelessWidget {
                     backgroundColor: Colors.black,
                     foregroundColor: Colors.white,
                   ),
+
                   onPressed: () {
-                    if (formKey.currentState!.validate()) {
-                     Navigator.pushNamedAndRemoveUntil(context, '/builder', (route) => false,);
+                    if (formKey.currentState!.validate()) {  
+                      Navigator.pushNamedAndRemoveUntil(context, '/builder', (route) => false,);                 
                     }
                   },
                   child: const Text('Continue'),
