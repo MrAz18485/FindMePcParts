@@ -4,7 +4,7 @@
             "outputFile": "com.example.findmepcparts.app-mergeDebugResources-25:/values-night-v8/values-night-v8.xml",
             "map": [
                 {
-                    "source": "/home/lolundcmd/Desktop/cs310_project/ahmettt/android/app/src/main/res/values-night/styles.xml",
+                    "source": "/home/lolundcmd/Desktop/CS310_PHASE3/android/app/src/main/res/values-night/styles.xml",
                     "from": {
                         "startLines": "3,14",
                         "startColumns": "4,4",
