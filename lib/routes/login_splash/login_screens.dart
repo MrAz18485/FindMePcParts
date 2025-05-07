@@ -3,6 +3,9 @@ import 'package:findmepcparts/util/text_styles.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+
+import 'package:findmepcparts/services/auth_gate.dart';
+
 import 'package:email_validator/email_validator.dart';
 
 class LoginChoiceScreen extends StatelessWidget {
@@ -62,8 +65,20 @@ class LoginChoiceScreen extends StatelessWidget {
 }
 
 
-class SignInScreen extends StatelessWidget {
-  const SignInScreen({super.key});
+class SignIn extends StatefulWidget // email, password variables will be updated, so we need a stateful widget
+{
+    SignIn({super.key});
+    String email = '';
+    String password = '';
+    String error = '';
+
+    @override
+    State<SignIn> createState() => _SignInState();
+}
+
+class _SignInState extends State<SignIn> {
+  final AuthService _auth = AuthService();
+  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -103,6 +118,13 @@ class SignInScreen extends StatelessWidget {
                     }
                     return null;
                   },
+
+                  onChanged: (value) {
+                    setState(() {
+                      widget.email = value ?? '';
+                    });
+                  },
+
                 ),
                 const SizedBox(height: 16),
                 TextFormField( 
@@ -119,6 +141,12 @@ class SignInScreen extends StatelessWidget {
                     }
                     return null;
                   },
+
+                  onChanged: (value) {
+                    setState(() {
+                        widget.password = value ?? '';
+                    });
+                  },
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton(
@@ -127,9 +155,19 @@ class SignInScreen extends StatelessWidget {
                     foregroundColor: Colors.white,
                   ),
 
-                  onPressed: () {
-                    if (formKey.currentState!.validate()) {  
-                      Navigator.pushNamedAndRemoveUntil(context, '/builder', (route) => false,);                 
+                  onPressed: () async {
+                    if (formKey.currentState!.validate()) {
+                      dynamic result = await _auth.signInEmailPass(widget.email, widget.password);
+                      if (result == null)
+                      {
+                        setState(() {
+                            widget.error = "Couldn't sign in";
+                        });
+                      }
+                      else
+                      {
+                        Navigator.pushNamedAndRemoveUntil(context, '/builder', (route) => false,);   // successful login       
+                      }
                     }
                   },
                   child: const Text('Continue'),
@@ -142,9 +180,19 @@ class SignInScreen extends StatelessWidget {
   }
 }
 
-class SignUpScreen extends StatelessWidget {
-  const SignUpScreen({super.key});
+class SignUp extends StatefulWidget
+{
+    String signup_email = '';
+    String signup_password = '';
+    String error = '';
 
+    SignUp({super.key});
+    @override
+    State<SignUp> createState() => _SignUpState();
+    
+}
+
+class _SignUpState extends State<SignUp> {
   @override
   Widget build(BuildContext context) {
     final emailController = TextEditingController();
@@ -181,6 +229,12 @@ class SignUpScreen extends StatelessWidget {
                     }
                     return null;
                   },
+
+                  onChanged: (value) {
+                    setState(() {
+                        widget.signup_email = value ?? '';
+                    });
+                  }
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton(
@@ -201,11 +255,11 @@ class SignUpScreen extends StatelessWidget {
   }
 }
 
-class ProfileSetupScreen extends StatelessWidget {
-  const ProfileSetupScreen({super.key});
+abstract class ProfileSetupScreen extends StatelessWidget {
+  ProfileSetupScreen({super.key});
+  final AuthService _auth = AuthService();
 
-  @override
-  Widget build(BuildContext context) {
+  Widget build_method(BuildContext context, String email) {
     final nameController = TextEditingController();
     final surnameController = TextEditingController();
     final passwordController = TextEditingController();
@@ -266,10 +320,17 @@ class ProfileSetupScreen extends StatelessWidget {
                     ),
                     padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                   ),
-                  onPressed: () {
+                  onPressed: () async {
                     if (formKey.currentState!.validate()) {
-                      Navigator.pushNamedAndRemoveUntil(context, '/builder', (route) => false,);
-
+                      dynamic result = await _auth.registerEmailPass(email, passwordController.text, "User1", nameController.text, surnameController.text); // we need the username too. Randomly generate?
+                      if (result == null)
+                      {
+                        print("Error while registering!");
+                      }
+                      else
+                      {
+                        Navigator.pushNamedAndRemoveUntil(context, '/builder', (route) => false,);   // successful login       
+                      }
                     }
                   },
                   child: const Text('Finish'),

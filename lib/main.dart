@@ -39,7 +39,7 @@ void main() async {
       '/welcome': (context) => const LoginChoiceScreen(),
       '/signin': (context) => const SignInScreen(),
       '/signup': (context) => const SignUpScreen(),
-      '/profileSetup': (context) => const ProfileSetupScreen(),
+      '/profileSetup': (context) => const ProfileSetupScreen(String email),
       '/sales': (context) =>  const OnSale(),
       '/settings': (context) =>  ChangeNotifierProvider(create: (_) => ThemeProvider(), child: const SettingsScreen()),
       '/profile': (context) => const ProfileScreen(),

@@ -8,10 +8,13 @@ class DatabaseService{
   // collection reference
   final CollectionReference userDataCollection = FirebaseFirestore.instance.collection('userData');
 
-  Future updateUserData (String name, String surname) async {
+  Future updateUserData (String username, String name, String surname, String email) async {
     return await userDataCollection.doc(uid).set({
+      'username': username,
       'name': name,
-      'surname': surname
+      'surname': surname,
+      'email': email,
+      // 'password': password, // must be hashed
     });
 
   }
