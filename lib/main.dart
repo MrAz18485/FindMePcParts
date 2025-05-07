@@ -37,9 +37,8 @@ void main() async {
     routes: {
       '/splash': (context) => const SplashScreen(),
       '/welcome': (context) => const LoginChoiceScreen(),
-      '/signin': (context) => const SignInScreen(),
-      '/signup': (context) => const SignUpScreen(),
-      '/profileSetup': (context) => const ProfileSetupScreen(String email),
+      '/signin': (context) => SignInScreen(),
+      '/profileSetup': (context) => ProfileSetupScreen(),
       '/sales': (context) =>  const OnSale(),
       '/settings': (context) =>  ChangeNotifierProvider(create: (_) => ThemeProvider(), child: const SettingsScreen()),
       '/profile': (context) => const ProfileScreen(),

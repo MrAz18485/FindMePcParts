@@ -65,18 +65,18 @@ class LoginChoiceScreen extends StatelessWidget {
 }
 
 
-class SignIn extends StatefulWidget // email, password variables will be updated, so we need a stateful widget
+class SignInScreen extends StatefulWidget // email, password variables will be updated, so we need a stateful widget
 {
-    SignIn({super.key});
+    SignInScreen({super.key});
     String email = '';
     String password = '';
     String error = '';
 
     @override
-    State<SignIn> createState() => _SignInState();
+    State<SignInScreen> createState() => _SignInState();
 }
 
-class _SignInState extends State<SignIn> {
+class _SignInState extends State<SignInScreen> {
   final AuthService _auth = AuthService();
   final _formKey = GlobalKey<FormState>();
 
@@ -180,6 +180,8 @@ class _SignInState extends State<SignIn> {
   }
 }
 
+
+/*
 class SignUp extends StatefulWidget
 {
     String signup_email = '';
@@ -254,14 +256,17 @@ class _SignUpState extends State<SignUp> {
     );
   }
 }
+*/
 
-abstract class ProfileSetupScreen extends StatelessWidget {
+
+class ProfileSetupScreen extends StatelessWidget {
   ProfileSetupScreen({super.key});
   final AuthService _auth = AuthService();
 
-  Widget build_method(BuildContext context, String email) {
+  const Widget build(BuildContext context) {
     final nameController = TextEditingController();
     final surnameController = TextEditingController();
+    final emailController = TextEditingController();
     final passwordController = TextEditingController();
     final confirmPasswordController = TextEditingController();
     final formKey = GlobalKey<FormState>();
@@ -280,22 +285,45 @@ abstract class ProfileSetupScreen extends StatelessWidget {
             child: ListView(
               shrinkWrap: true,
               children: [
+
                 _buildStyledTextFormField(
                   label: 'Your Name',
                   controller: nameController,
                 ),
+
                 const SizedBox(height: 16),
+
                 _buildStyledTextFormField(
                   label: 'Your Surname',
                   controller: surnameController,
                 ),
+
                 const SizedBox(height: 16),
+
+                _buildStyledTextFormField(
+                  label: 'Email',
+                  controller: emailController,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "Cannot leave email empty!";
+                    }
+                    if (!EmailValidator.validate(value)) {
+                      return "Not a valid email";
+                    }
+                    return null;
+                  },
+                ),
+
+                const SizedBox(height: 16),
+
                 _buildStyledTextFormField(
                   label: 'Password',
                   controller: passwordController,
                   obscure: true,
                 ),
+
                 const SizedBox(height: 16),
+
                 _buildStyledTextFormField(
                   label: 'Confirm Password',
                   controller: confirmPasswordController,
@@ -310,7 +338,9 @@ abstract class ProfileSetupScreen extends StatelessWidget {
                     return null;
                   },
                 ),
+
                 const SizedBox(height: 24),
+
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.buttonBackgroundColor,
@@ -322,7 +352,7 @@ abstract class ProfileSetupScreen extends StatelessWidget {
                   ),
                   onPressed: () async {
                     if (formKey.currentState!.validate()) {
-                      dynamic result = await _auth.registerEmailPass(email, passwordController.text, "User1", nameController.text, surnameController.text); // we need the username too. Randomly generate?
+                      dynamic result = await _auth.registerEmailPass(emailController.text, passwordController.text, "", nameController.text, surnameController.text); // we need the username too. Randomly generate?
                       if (result == null)
                       {
                         print("Error while registering!");
