@@ -65,18 +65,7 @@ class LoginChoiceScreen extends StatelessWidget {
 }
 
 
-class SignInScreen extends StatefulWidget // email, password variables will be updated, so we need a stateful widget
-{
-    SignInScreen({super.key});
-    String email = '';
-    String password = '';
-    String error = '';
-
-    @override
-    State<SignInScreen> createState() => _SignInState();
-}
-
-class _SignInState extends State<SignInScreen> {
+class SignInScreen extends StatelessWidget {
   final AuthService _auth = AuthService();
   final _formKey = GlobalKey<FormState>();
 
@@ -119,12 +108,6 @@ class _SignInState extends State<SignInScreen> {
                     return null;
                   },
 
-                  onChanged: (value) {
-                    setState(() {
-                      widget.email = value ?? '';
-                    });
-                  },
-
                 ),
                 const SizedBox(height: 16),
                 TextFormField( 
@@ -141,12 +124,6 @@ class _SignInState extends State<SignInScreen> {
                     }
                     return null;
                   },
-
-                  onChanged: (value) {
-                    setState(() {
-                        widget.password = value ?? '';
-                    });
-                  },
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton(
@@ -157,12 +134,11 @@ class _SignInState extends State<SignInScreen> {
 
                   onPressed: () async {
                     if (formKey.currentState!.validate()) {
-                      dynamic result = await _auth.signInEmailPass(widget.email, widget.password);
+                      // print(emailController.text);
+                      dynamic result = await _auth.signInEmailPass(emailController.text, passwordController.text);
                       if (result == null)
                       {
-                        setState(() {
-                            widget.error = "Couldn't sign in";
-                        });
+                        print("Failed to login: $result");
                       }
                       else
                       {
@@ -180,92 +156,14 @@ class _SignInState extends State<SignInScreen> {
   }
 }
 
-
-/*
-class SignUp extends StatefulWidget
-{
-    String signup_email = '';
-    String signup_password = '';
-    String error = '';
-
-    SignUp({super.key});
-    @override
-    State<SignUp> createState() => _SignUpState();
-    
-}
-
-class _SignUpState extends State<SignUp> {
-  @override
-  Widget build(BuildContext context) {
-    final emailController = TextEditingController();
-    final formKey = GlobalKey<FormState>();
-
-    return Scaffold(
-      backgroundColor: AppColors.bodyBackgroundColor,
-      appBar: AppBar(
-        title: const Text('Create Account'),
-        backgroundColor: AppColors.appBarBackgroundColor,
-      ),
-      body: Container(
-        color: AppColors.bodyBackgroundColor,
-        padding: const EdgeInsets.all(20.0),
-        child: Form(
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextFormField(
-                 keyboardType: TextInputType.emailAddress,
-                  controller: emailController,
-                  cursorColor: Colors.black,
-                  decoration:  InputDecoration(labelText: 'Email',
-                  floatingLabelStyle : TextStyle(color: Colors.black),
-                  focusedBorder: formBorder,
-                  ),       
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Cannot leave email empty!";
-                    }
-                    if (!EmailValidator.validate(value)) {
-                      return "Not a valid email";
-                    }
-                    return null;
-                  },
-
-                  onChanged: (value) {
-                    setState(() {
-                        widget.signup_email = value ?? '';
-                    });
-                  }
-                ),
-                const SizedBox(height: 24),
-                ElevatedButton(
-                  style: loginButtonStyle,
-                  onPressed: () {
-                    if (formKey.currentState!.validate()) {
-                      Navigator.pushNamed(context, '/profileSetup');
-                    }
-                  },
-                  child: const Text('Continue'),
-                ),
-              ],
-            ),
-          ),
-
-      ),
-    );
-  }
-}
-*/
-
-
 class ProfileSetupScreen extends StatelessWidget {
   ProfileSetupScreen({super.key});
   final AuthService _auth = AuthService();
 
-  const Widget build(BuildContext context) {
+  Widget build(BuildContext context) {
     final nameController = TextEditingController();
     final surnameController = TextEditingController();
+    final usernamecontroller = TextEditingController();
     final emailController = TextEditingController();
     final passwordController = TextEditingController();
     final confirmPasswordController = TextEditingController();
@@ -296,6 +194,13 @@ class ProfileSetupScreen extends StatelessWidget {
                 _buildStyledTextFormField(
                   label: 'Your Surname',
                   controller: surnameController,
+                ),
+
+                const SizedBox(height: 16),
+
+                _buildStyledTextFormField(
+                  label: 'Username',
+                  controller: usernamecontroller,
                 ),
 
                 const SizedBox(height: 16),
@@ -352,13 +257,15 @@ class ProfileSetupScreen extends StatelessWidget {
                   ),
                   onPressed: () async {
                     if (formKey.currentState!.validate()) {
-                      dynamic result = await _auth.registerEmailPass(emailController.text, passwordController.text, "", nameController.text, surnameController.text); // we need the username too. Randomly generate?
+                      dynamic result = await _auth.registerEmailPass(emailController.text, passwordController.text, usernamecontroller.text,
+                                                   nameController.text, surnameController.text); // Or create a random username? Or, set name to null initially?
                       if (result == null)
                       {
-                        print("Error while registering!");
+                        print("Error while registering: $result");
                       }
                       else
                       {
+                        print("Registered user!");
                         Navigator.pushNamedAndRemoveUntil(context, '/builder', (route) => false,);   // successful login       
                       }
                     }

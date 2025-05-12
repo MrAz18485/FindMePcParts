@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import "package:findmepcparts/services/auth_gate.dart";
 import '../../util/colors.dart';
 import '../../util/text_styles.dart';
 import '../../util/paddings.dart';
@@ -9,7 +10,8 @@ import '../../main.dart';
 
 
 class SettingsScreen extends StatelessWidget {
-  const SettingsScreen({super.key});
+  SettingsScreen({super.key});
+  final AuthService _auth = AuthService();
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +24,7 @@ class SettingsScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.bodyBackgroundColor,
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(60),
+        preferredSize: Size.fromHeight(60),
         child: AppBar(
           backgroundColor: AppColors.appBarBackgroundColor,
           elevation: 0,
@@ -36,7 +38,7 @@ class SettingsScreen extends StatelessWidget {
       body: ListView(
         padding: AppPaddings.screen,
         children: [
-          const Divider(color: Colors.black,),
+          Divider(color: Colors.black,),
 
           _settingsTile(context, Icons.person, 'Profile', '/profile', iconColor, textColor),
           _settingsTile(context, Icons.language, 'Language', '/language', iconColor, textColor),
@@ -50,19 +52,20 @@ class SettingsScreen extends StatelessWidget {
               },
             ),
           ),
-          const Divider(color: Colors.black,),
+          Divider(color: Colors.black,),
           _settingsTile(context, Icons.info, 'About', '/about', iconColor, textColor),
           ListTile(
             leading: Icon(Icons.logout, size: 28, color: iconColor),
             title: Text('Log Out', style: settingsTitle.copyWith(color: textColor)),
-            onTap: () {
-              // Handle logout logic here
+            onTap: () async {
+              await _auth.signOut();
+              Navigator.pushNamedAndRemoveUntil(context, '/welcome', (route) => false,);   // successful login       
             },
           ),
-          const Divider(color: Colors.black),
+          Divider(color: Colors.black),
         ],
       ),
-          bottomNavigationBar:const CustomNavBar(),
+          bottomNavigationBar: CustomNavBar(),
     );
   }
 
