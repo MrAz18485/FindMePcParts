@@ -201,6 +201,12 @@ class ProfileSetupScreen extends StatelessWidget {
                 _buildStyledTextFormField(
                   label: 'Username',
                   controller: usernamecontroller,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "Cannot leave username empty!"; // TODO: Check if same username exists in DB
+                    }
+                    return null;
+                  },
                 ),
 
                 const SizedBox(height: 16),
@@ -257,8 +263,7 @@ class ProfileSetupScreen extends StatelessWidget {
                   ),
                   onPressed: () async {
                     if (formKey.currentState!.validate()) {
-                      dynamic result = await _auth.registerEmailPass(emailController.text, passwordController.text, usernamecontroller.text,
-                                                   nameController.text, surnameController.text); // Or create a random username? Or, set name to null initially?
+                      dynamic result = await _auth.registerEmailPass(emailController.text, passwordController.text, usernamecontroller.text, nameController.text, surnameController.text);
                       if (result == null)
                       {
                         print("Error while registering: $result");
@@ -290,13 +295,6 @@ class ProfileSetupScreen extends StatelessWidget {
       controller: controller,
       obscureText: obscure,
       cursorColor: Colors.black,
-      validator: validator ??
-          (value) {
-            if (value == null || value.isEmpty) {
-              return 'Cannot leave $label empty!';
-            }
-            return null;
-          },
       decoration:  InputDecoration(labelText: label,
                   floatingLabelStyle : TextStyle(color: Colors.black),
                   focusedBorder: formBorder,

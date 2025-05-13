@@ -6,7 +6,7 @@ class DatabaseService{
   DatabaseService ({required this.uid});
 
   // collection reference
-  final CollectionReference userDataCollection = FirebaseFirestore.instance.collection('userData');
+  final CollectionReference userDataCollection = FirebaseFirestore.instance.collection('users');
 
   Future updateUserData (String username, String name, String surname, String email) async {
     return await userDataCollection.doc(uid).set({
@@ -14,8 +14,6 @@ class DatabaseService{
       'name': name,
       'surname': surname,
       'email': email,
-      // 'password': password, // must be hashed
     });
-
   }
 }

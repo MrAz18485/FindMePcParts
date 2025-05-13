@@ -48,7 +48,7 @@ class AuthService {
       User? user = result.user;
 
       // We have to set up firebase DB to be able to use this
-      // await DatabaseService(uid: user!.uid).updateUserData(username, name, surname, email);
+      await DatabaseService(uid: user!.uid).updateUserData(username, name, surname, email);
       return _userFromFirebaseUser(user);
     }
     catch(e) {
