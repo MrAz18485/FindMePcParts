@@ -3,7 +3,6 @@ import 'package:findmepcparts/util/text_styles.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-
 import 'package:findmepcparts/services/auth_gate.dart';
 
 import 'package:email_validator/email_validator.dart';
@@ -16,7 +15,6 @@ class LoginChoiceScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.bodyBackgroundColor,
       body: SafeArea(
-        
         child: Center(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 32.0),
@@ -24,17 +22,14 @@ class LoginChoiceScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 const SizedBox(height: 90),
-                Text(
-                  'PC Goblin',
-                  style: logoTextStyle2,
-                ),
+                Text('PC Goblin', style: logoTextStyle2),
                 const SizedBox(height: 40),
                 ClipOval(
                   child: Image.asset(
                     "assets/goblin.png",
-                    width: 200, 
+                    width: 200,
                     height: 200,
-                    fit: BoxFit.cover, 
+                    fit: BoxFit.cover,
                   ),
                 ),
                 const SizedBox(height: 40),
@@ -51,7 +46,8 @@ class LoginChoiceScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton(
-                  onPressed: () => Navigator.pushReplacementNamed(context, '/builder'),
+                  onPressed:
+                      () => Navigator.pushReplacementNamed(context, '/builder'),
                   style: guestButtonStyle,
                   child: const Text('Continue as guest'),
                 ),
@@ -64,7 +60,6 @@ class LoginChoiceScreen extends StatelessWidget {
   }
 }
 
-
 class SignInScreen extends StatelessWidget {
   final AuthService _auth = AuthService();
   final _formKey = GlobalKey<FormState>();
@@ -73,7 +68,7 @@ class SignInScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final emailController = TextEditingController();
     final passwordController = TextEditingController();
-    final formKey = GlobalKey<FormState>(); 
+    final formKey = GlobalKey<FormState>();
 
     return Scaffold(
       appBar: AppBar(
@@ -82,75 +77,98 @@ class SignInScreen extends StatelessWidget {
       ),
       backgroundColor: AppColors.bodyBackgroundColor,
       body: Container(
-        
         padding: const EdgeInsets.all(20.0),
         color: AppColors.bodyBackgroundColor,
-        child: Form( 
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextFormField(
-                  keyboardType: TextInputType.emailAddress,
-                  controller: emailController,
-                  cursorColor: Colors.black,
-                  decoration:  InputDecoration(labelText: 'Email',
-                  floatingLabelStyle : TextStyle(color: Colors.black),
+        child: Form(
+          key: formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                keyboardType: TextInputType.emailAddress,
+                controller: emailController,
+                cursorColor: Colors.black,
+                decoration: InputDecoration(
+                  labelText: 'Email',
+                  floatingLabelStyle: TextStyle(color: Colors.black),
                   focusedBorder: formBorder,
-                  ),       
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Cannot leave email empty!";
-                    }
-                    if (!EmailValidator.validate(value)) {
-                      return "Not a valid email";
-                    }
-                    return null;
-                  },
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Cannot leave email empty!";
+                  }
+                  if (!EmailValidator.validate(value)) {
+                    return "Not a valid email";
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: passwordController,
+                cursorColor: Colors.black,
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                  floatingLabelStyle: TextStyle(color: Colors.black),
+                  focusedBorder: formBorder,
+                ),
+                obscureText: true,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Password cannot be empty!";
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black,
+                  foregroundColor: Colors.white,
+                ),
 
-                ),
-                const SizedBox(height: 16),
-                TextFormField( 
-                  controller: passwordController,
-                  cursorColor: Colors.black,
-                  decoration:  InputDecoration(labelText: 'Password',
-                  floatingLabelStyle : TextStyle(color: Colors.black),
-                  focusedBorder: formBorder
-                  ),
-                  obscureText: true,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Password cannot be empty!";
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 24),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
-                    foregroundColor: Colors.white,
-                  ),
+                onPressed: () async {
+                  if (formKey.currentState!.validate()) {
+                    // print(emailController.text);
+                    dynamic result = await _auth.signInEmailPass(
+                      emailController.text,
+                      passwordController.text,
+                    );
+                    if (result != null) {
+                      print("Failed to login: $result");
+                      showDialog(
+                        context: context,
+                        builder:
+                            (context) => AlertDialog(
+                              backgroundColor: Colors.white,
 
-                  onPressed: () async {
-                    if (formKey.currentState!.validate()) {
-                      // print(emailController.text);
-                      dynamic result = await _auth.signInEmailPass(emailController.text, passwordController.text);
-                      if (result == null)
-                      {
-                        print("Failed to login: $result");
-                      }
-                      else
-                      {
-                        Navigator.pushNamedAndRemoveUntil(context, '/builder', (route) => false,);   // successful login       
-                      }
+                              title: const Text("Error"),
+                              content: Text("$result"),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: const Text(
+                                    "OK",
+                                    style: TextStyle(color: Colors.black),
+                                  ),
+                                ),
+                              ],
+                            ),
+                      );
+                    } else {
+                      Navigator.pushNamedAndRemoveUntil(
+                        context,
+                        '/builder',
+                        (route) => false,
+                      ); // successful login
                     }
-                  },
-                  child: const Text('Continue'),
-                ),
-              ],
-            ),
+                  }
+                },
+                child: const Text('Continue'),
+              ),
+            ],
           ),
+        ),
       ),
     );
   }
@@ -179,104 +197,168 @@ class ProfileSetupScreen extends StatelessWidget {
         color: AppColors.bodyBackgroundColor,
         padding: const EdgeInsets.all(20.0),
         child: Form(
-            key: formKey,
-            child: ListView(
-              shrinkWrap: true,
-              children: [
+          key: formKey,
+          child: ListView(
+            shrinkWrap: true,
+            children: [
+              _buildStyledTextFormField(
+                label: 'Your Name',
+                controller: nameController,
+                validator: null
+              ),
 
-                _buildStyledTextFormField(
-                  label: 'Your Name',
-                  controller: nameController,
-                ),
+              const SizedBox(height: 16),
 
-                const SizedBox(height: 16),
+              _buildStyledTextFormField(
+                label: 'Your Surname',
+                controller: surnameController,
+                validator: null
+              ),
 
-                _buildStyledTextFormField(
-                  label: 'Your Surname',
-                  controller: surnameController,
-                ),
+              const SizedBox(height: 16),
 
-                const SizedBox(height: 16),
+              _buildStyledTextFormField(
+                label: 'Username',
+                controller: usernamecontroller,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Cannot leave username empty!";
+                  }
+                  return null;
+                },
+              ),
 
-                _buildStyledTextFormField(
-                  label: 'Username',
-                  controller: usernamecontroller,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Cannot leave username empty!";
-                    }
-                    return null;
-                  },
-                ),
+              const SizedBox(height: 16),
 
-                const SizedBox(height: 16),
+              _buildStyledTextFormField(
+                label: 'Email',
+                controller: emailController,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Cannot leave email empty!";
+                  }
+                  if (!EmailValidator.validate(value)) {
+                    return "Not a valid email";
+                  }
+                  return null;
+                },
+              ),
 
-                _buildStyledTextFormField(
-                  label: 'Email',
-                  controller: emailController,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Cannot leave email empty!";
-                    }
-                    if (!EmailValidator.validate(value)) {
-                      return "Not a valid email";
-                    }
-                    return null;
-                  },
-                ),
+              const SizedBox(height: 16),
 
-                const SizedBox(height: 16),
+              _buildStyledTextFormField(
+                label: 'Password',
+                controller: passwordController,
+                obscure: true,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                      return "Cannot leave Password empty!";
+                  }
+                  else if (value.length < 6)
+                  {
+                    return "Password length cannot be less than 6!";
+                  }
+                  return null;
+                }
+              ),
 
-                _buildStyledTextFormField(
-                  label: 'Password',
-                  controller: passwordController,
-                  obscure: true,
-                ),
+              const SizedBox(height: 16),
 
-                const SizedBox(height: 16),
+              _buildStyledTextFormField(
+                label: 'Confirm Password',
+                controller: confirmPasswordController,
+                obscure: true,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Cannot leave Confirm Password empty!";
+                  }
+                  if (value != passwordController.text) {
+                    return "Passwords do not match!";
+                  }
+                  return null;
+                },
+              ),
 
-                _buildStyledTextFormField(
-                  label: 'Confirm Password',
-                  controller: confirmPasswordController,
-                  obscure: true,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Cannot leave Confirm Password empty!";
-                    }
-                    if (value != passwordController.text) {
-                      return "Passwords do not match!";
-                    }
-                    return null;
-                  },
-                ),
+              const SizedBox(height: 24),
 
-                const SizedBox(height: 24),
-
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.buttonBackgroundColor,
-                    foregroundColor: AppColors.buttonTextColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.buttonBackgroundColor,
+                  foregroundColor: AppColors.buttonTextColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
                   ),
-                  onPressed: () async {
-                    if (formKey.currentState!.validate()) {
-                      dynamic result = await _auth.registerEmailPass(emailController.text, passwordController.text, usernamecontroller.text, nameController.text, surnameController.text);
-                      if (result != null)
-                      {
-                        print("Registered user!");
-                        Navigator.pushNamedAndRemoveUntil(context, '/builder', (route) => false,);   // successful login       
-                      }
-                    }
-                  },
-                  child: const Text('Finish'),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 16,
+                  ),
                 ),
-              ],
-            ),
+                onPressed: () async {
+                  if (formKey.currentState!.validate()) {
+                    dynamic result = await _auth.registerEmailPass(
+                      emailController.text,
+                      passwordController.text,
+                      usernamecontroller.text,
+                      nameController.text,
+                      surnameController.text,
+                    );
+                    if (result == null) {
+                      print("Registered user!");
+                      Navigator.pushNamedAndRemoveUntil(
+                        context,
+                        '/builder',
+                        (route) => false,
+                      ); // successful login
+                    }
+                    else
+                    {
+                      showDialog(
+                      context: context,
+                      builder:
+                          (context) => AlertDialog(
+                            backgroundColor: Colors.white,
+                            title: const Text("Error"),
+                            content: Text("$result"),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text(
+                                  "OK",
+                                  style: TextStyle(color: Colors.black),
+                                ),
+                              ),
+                            ],
+                          ),
+                    );
+                    }
+                  } else {
+                    print("Invalid form!");
+                    showDialog(
+                      context: context,
+                      builder:
+                          (context) => AlertDialog(
+                            backgroundColor: Colors.white,
+
+                            title: const Text("Error"),
+                            content: Text("At least one required field is empty/invalid."),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text(
+                                  "OK",
+                                  style: TextStyle(color: Colors.black),
+                                ),
+                              ),
+                            ],
+                          ),
+                    );
+                  }
+                },
+                child: const Text('Finish'),
+              ),
+            ],
           ),
-     
+        ),
       ),
     );
   }
@@ -291,10 +373,13 @@ class ProfileSetupScreen extends StatelessWidget {
       controller: controller,
       obscureText: obscure,
       cursorColor: Colors.black,
-      decoration:  InputDecoration(labelText: label,
-                  floatingLabelStyle : TextStyle(color: Colors.black),
-                  focusedBorder: formBorder,
-                  ),       
+      decoration: InputDecoration(
+        labelText: label,
+        floatingLabelStyle: TextStyle(color: Colors.black),
+        focusedBorder: formBorder,
+      ),
+      validator: validator,
     );
   }
 }
+

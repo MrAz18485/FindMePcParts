@@ -33,11 +33,10 @@ class AuthService {
     try {
       UserCredential result = await _auth.signInWithEmailAndPassword(email: email, password: password);
       User? user = result.user;
-      return _userFromFirebaseUser(user);
-    }
-    catch(e) {
-      print(e.toString());
       return null;
+    }
+    on FirebaseAuthException catch (e) { 
+      return e.message;
     }
 
   }
@@ -51,7 +50,7 @@ class AuthService {
       qs.docs.forEach((row) { // inefficient sequential search
         if (row["username"] == username)
         {
-          throw "Username exists!";
+          throw "Username already exists!";
         }
       });
 
@@ -59,11 +58,11 @@ class AuthService {
       User? user = result.user;   
 
       await DatabaseService(uid: user!.uid).updateUserData(username, name ?? "", surname ?? "", email);
-      return _userFromFirebaseUser(user);
+      return null; // successful execution
     }
-    catch(e) {
-      print(e.toString());
-      return null;
+    
+    on FirebaseAuthException catch (e) { 
+      return e.message;
     }
 
   }
