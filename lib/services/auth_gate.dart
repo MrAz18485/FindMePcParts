@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:findmepcparts/services/database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:findmepcparts/models/user.dart';
@@ -42,13 +43,22 @@ class AuthService {
   }
 
   // Register with email pass
-  Future registerEmailPass(String email, String password, String username, String name, String surname) async {
+  Future registerEmailPass(String email, String password, String username, String? name, String? surname) async {
     try {
-      UserCredential result = await _auth.createUserWithEmailAndPassword(email: email, password: password);
-      User? user = result.user;
 
-      // We have to set up firebase DB to be able to use this
-      await DatabaseService(uid: user!.uid).updateUserData(username, name, surname, email);
+      // 1) check if username exists
+      QuerySnapshot qs = await FirebaseFirestore.instance.collection("users").get();
+      qs.docs.forEach((row) { // inefficient sequential search
+        if (row["username"] == username)
+        {
+          throw "Username exists!";
+        }
+      });
+
+      UserCredential result = await _auth.createUserWithEmailAndPassword(email: email, password: password);
+      User? user = result.user;   
+
+      await DatabaseService(uid: user!.uid).updateUserData(username, name ?? "", surname ?? "", email);
       return _userFromFirebaseUser(user);
     }
     catch(e) {

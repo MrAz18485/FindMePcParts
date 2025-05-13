@@ -203,7 +203,7 @@ class ProfileSetupScreen extends StatelessWidget {
                   controller: usernamecontroller,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return "Cannot leave username empty!"; // TODO: Check if same username exists in DB
+                      return "Cannot leave username empty!";
                     }
                     return null;
                   },
@@ -264,11 +264,7 @@ class ProfileSetupScreen extends StatelessWidget {
                   onPressed: () async {
                     if (formKey.currentState!.validate()) {
                       dynamic result = await _auth.registerEmailPass(emailController.text, passwordController.text, usernamecontroller.text, nameController.text, surnameController.text);
-                      if (result == null)
-                      {
-                        print("Error while registering: $result");
-                      }
-                      else
+                      if (result != null)
                       {
                         print("Registered user!");
                         Navigator.pushNamedAndRemoveUntil(context, '/builder', (route) => false,);   // successful login       

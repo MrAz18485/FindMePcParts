@@ -16,4 +16,14 @@ class DatabaseService{
       'email': email,
     });
   }
+
+  Future fetchUserData(String username) async {
+    QuerySnapshot qs = await FirebaseFirestore.instance.collection("users").get();
+    qs.docs.forEach((row) {
+      if (row["username"] == username)
+      {
+        throw "Username exists!";
+      }
+    });
+  }
 }
