@@ -18,7 +18,6 @@ import 'routes/settings/profile_screen.dart';
 import 'routes/settings/change_details_screen.dart';
 import 'routes/settings/language_screen.dart';
 import 'routes/settings/about_screen.dart';
-import "services/auth_gate.dart";
 
 import 'package:provider/provider.dart';
 
