@@ -166,6 +166,18 @@ class SignInScreen extends StatelessWidget {
                 },
                 child: const Text('Continue'),
               ),
+
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black,
+                  foregroundColor: Colors.white,
+                ),
+
+                onPressed: () {
+                  
+                },
+                child: const Text('Forgot password?'),
+              ),
             ],
           ),
         ),

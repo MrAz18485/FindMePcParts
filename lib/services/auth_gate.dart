@@ -57,7 +57,10 @@ class AuthService {
       UserCredential result = await _auth.createUserWithEmailAndPassword(email: email, password: password);
       User? user = result.user;   
 
-      await DatabaseService(uid: user!.uid).updateUserData(username, name ?? "", surname ?? "", email);
+      DateTime currentDate = DateTime.now();
+      String registeredAt = currentDate.toString();
+
+      await DatabaseService(uid: user!.uid).updateUserData(username, name ?? "", surname ?? "", email, registeredAt);
       return null; // successful execution
     }
     
@@ -67,15 +70,15 @@ class AuthService {
 
   }
 
-  // sign out
-Future signOut() async {
-    try {
-      return await _auth.signOut();
-    }
-    catch(e) {
-      print(e.toString());
-      return null;
-    }
-}
+    // sign out
+  Future signOut() async {
+      try {
+        return await _auth.signOut();
+      }
+      catch(e) {
+        print(e.toString());
+        return null;
+      }
+  }
 
 }

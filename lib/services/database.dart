@@ -8,16 +8,17 @@ class DatabaseService{
   // collection reference
   final CollectionReference userDataCollection = FirebaseFirestore.instance.collection('users');
 
-  Future updateUserData (String username, String name, String surname, String email) async {
+  Future updateUserData (String username, String name, String surname, String email, String registeredAt) async {
     return await userDataCollection.doc(uid).set({
       'username': username,
       'name': name,
       'surname': surname,
       'email': email,
+      'registered_at': registeredAt,
     });
   }
 
-  Future fetchUserData(String username) async {
+  Future fetchUsername(String username) async {
     QuerySnapshot qs = await FirebaseFirestore.instance.collection("users").get();
     qs.docs.forEach((row) {
       if (row["username"] == username)
