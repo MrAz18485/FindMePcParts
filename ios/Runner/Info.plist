@@ -46,4 +46,8 @@
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 </dict>
+
 </plist>
+
+<key>NSLocalNetworkUsageDescription</key>
+<string>Uygulama yerel ağ üzerinde çalışmak için erişim istiyor.</string>
