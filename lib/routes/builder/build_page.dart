@@ -6,6 +6,10 @@ import 'select_part_screen.dart';
 import 'package:findmepcparts/routes/builder/part.dart';
 import 'package:findmepcparts/routes/builder/build.dart';
 import 'package:findmepcparts/util/text_styles.dart';
+import 'package:findmepcparts/services/database.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 
 class NBuildPage extends StatefulWidget {
   const NBuildPage({Key? key}) : super(key: key);
@@ -15,22 +19,50 @@ class NBuildPage extends StatefulWidget {
 }
 
 class _BuildPageState extends State<NBuildPage> {
-  List<Build> builds = [
-    Build(
-      name: 'My Build 1',
-      parts: [
-        Part(name: "Intel Core i5 750", category: "Processor(CPU)", price: 15),
-        Part(name: "GeForce RTX 4060", category: "Graphics Card(GPU)", price: 350, imageUrl: 'assets/4060.jpg'),
-        Part(name: "Kingston 8 GB 1333 Mhz RAM", category: "Physical Memory(RAM)", price: 30, imageUrl: 'assets/ram.jpg')
-      ],
-    ),
-    Build(
-      name: 'My Build 2',
-      parts: [
-        Part(name: "Intel Core i7 13700", category: "Processor(CPU)", price: 150, imageUrl: 'assets/i7_13700.jpg')      
-      ],
-    ),
-  ];
+  List<Build> builds = [];
+  final DatabaseService _databaseService = DatabaseService(uid: FirebaseAuth.instance.currentUser?.uid ?? '');
+  final String _username = FirebaseAuth.instance.currentUser?.displayName ?? '';
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBuilds();
+  }
+
+  Future<void> _loadBuilds() async {
+    try {
+      setState(() {
+        isLoading = true;
+      });
+      
+      // Check if user is authenticated
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        print('Error: User is not authenticated');
+        setState(() {
+          isLoading = false;
+        });
+        return;
+      }
+      
+      print('Current user: ${user.displayName}');
+      print('Current user ID: ${user.uid}');
+      
+      final List<Map<String, dynamic>> buildData = await _databaseService.fetchBuilds(_username);
+      print('Fetched build data: $buildData');
+      
+      setState(() {
+        builds = buildData.map((data) => Build.fromMap(data)).toList();
+        isLoading = false;
+      });
+    } catch (e) {
+      print('Error loading builds: $e');
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
 
   // Default part names in order (for reset purpose)
   final List<String> defaultPartNames = [
@@ -71,7 +103,11 @@ class _BuildPageState extends State<NBuildPage> {
           ),
         ],
       ),
-      body: Padding(
+      body: isLoading 
+        ? const Center(child: CircularProgressIndicator())
+        : builds.isEmpty
+          ? const Center(child: Text('No builds yet. Create your first build!'))
+          : Padding(
         padding: const EdgeInsets.all(16),
         child: ListView.builder(
           itemCount: builds.length,
@@ -119,10 +155,13 @@ class _BuildPageState extends State<NBuildPage> {
                     ),
                     IconButton(
                       icon: const Icon(Icons.delete, color: AppColors.flameColor),
-                      onPressed: () {
-                        setState(() {
-                          builds.removeAt(buildIndex);
-                        });
+                      onPressed: () async {
+                        if (build.id != null) {
+                          await _databaseService.deleteBuild(build.id!);
+                          setState(() {
+                            builds.removeAt(buildIndex);
+                          });
+                        }
                       },
                     ),
                   ],
@@ -149,23 +188,40 @@ class _BuildPageState extends State<NBuildPage> {
   Widget buildPartItem(Build build, int buildIndex, Part part, int partIndex) {
     return Card(
       shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(8),
-    side: BorderSide(
-      color: Colors.grey, 
-      width: 1.5, 
-    ),
-  ),
+        borderRadius: BorderRadius.circular(8),
+        side: BorderSide(
+          color: Colors.grey, 
+          width: 1.5, 
+        ),
+      ),
       color: Colors.white,
       margin: const EdgeInsets.symmetric(vertical: 8),
       child: ListTile(
         leading: Container(
           width: 50,
           height: 50,
-          color: Colors.grey.shade300,
-          child: const Center(child: Text('Image')),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade200,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: part.imageUrl.isNotEmpty
+                ? Image.network(
+                    part.imageUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Center(child: Icon(Icons.memory));
+                    },
+                  )
+                : const Center(child: Icon(Icons.memory)),
+          ),
         ),
         title: Text(part.name),
-        subtitle: Text('${part.category}\n${part.price}'),
+        subtitle: Text(
+          '${part.category}\n\$${part.price.toStringAsFixed(2)}',
+          style: const TextStyle(fontSize: 12),
+        ),
         isThreeLine: true,
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
@@ -173,12 +229,19 @@ class _BuildPageState extends State<NBuildPage> {
             IconButton(
               icon: const Icon(Icons.edit, color: Colors.blue),
               onPressed: () async {
-                final selectedPartName = await Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => SelectPartScreen()),
+                final selectedPart = await Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => SelectPartScreen(
+                      category: part.category,
+                    ),
+                  ),
                 );
-                if (selectedPartName != null && selectedPartName is String) {
+                if (selectedPart != null && selectedPart is Part) {
                   setState(() {
-                    build.parts[partIndex].name = selectedPartName;
+                    build.parts[partIndex] = selectedPart;
+                    if (build.id != null) {
+                      _databaseService.updateBuild(build.id!, build);
+                    }
                   });
                 }
               },
@@ -188,9 +251,22 @@ class _BuildPageState extends State<NBuildPage> {
               onPressed: () {
                 setState(() {
                   if (partIndex < defaultPartNames.length) {
-                    build.parts[partIndex].name = defaultPartNames[partIndex];
+                    build.parts[partIndex] = Part(
+                      name: defaultPartNames[partIndex],
+                      category: defaultPartNames[partIndex],
+                      price: 0,
+                      imageUrl: '',
+                    );
                   } else {
-                    build.parts[partIndex].name = 'Part';
+                    build.parts[partIndex] = Part(
+                      name: 'Part',
+                      category: '',
+                      price: 0,
+                      imageUrl: '',
+                    );
+                  }
+                  if (build.id != null) {
+                    _databaseService.updateBuild(build.id!, build);
                   }
                 });
               },
@@ -215,5 +291,9 @@ class _BuildPageState extends State<NBuildPage> {
         return SlideTransition(position: offsetAnimation, child: child);
       },
     );
+  }
+
+  Future<void> deleteBuild(String buildId) async {
+    await FirebaseFirestore.instance.collection("builds").doc(buildId).delete();
   }
 }

@@ -1,9 +1,10 @@
 import 'package:findmepcparts/util/colors.dart';
 import 'package:findmepcparts/util/text_styles.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import 'package:provider/provider.dart';
 import 'package:findmepcparts/services/auth_gate.dart';
+
 
 import 'package:email_validator/email_validator.dart';
 
@@ -61,11 +62,11 @@ class LoginChoiceScreen extends StatelessWidget {
 }
 
 class SignInScreen extends StatelessWidget {
-  final AuthService _auth = AuthService();
-  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
+    final AuthService _auth = Provider.of<AuthService>(context);
+    final _formKey = GlobalKey<FormState>();
     final emailController = TextEditingController();
     final passwordController = TextEditingController();
     final formKey = GlobalKey<FormState>();
@@ -166,6 +167,18 @@ class SignInScreen extends StatelessWidget {
                 },
                 child: const Text('Continue'),
               ),
+
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black,
+                  foregroundColor: Colors.white,
+                ),
+
+                onPressed: () {
+                  
+                },
+                child: const Text('Forgot password?'),
+              ),
             ],
           ),
         ),
@@ -176,9 +189,10 @@ class SignInScreen extends StatelessWidget {
 
 class ProfileSetupScreen extends StatelessWidget {
   ProfileSetupScreen({super.key});
-  final AuthService _auth = AuthService();
 
   Widget build(BuildContext context) {
+    final AuthService _auth = Provider.of<AuthService>(context);
+
     final nameController = TextEditingController();
     final surnameController = TextEditingController();
     final usernamecontroller = TextEditingController();
@@ -382,4 +396,3 @@ class ProfileSetupScreen extends StatelessWidget {
     );
   }
 }
-
