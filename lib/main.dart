@@ -7,6 +7,7 @@ import 'package:findmepcparts/routes/login_splash/splash.dart';
 import 'package:findmepcparts/routes/sales/sales.dart';
 
 import 'package:findmepcparts/firebase_options.dart';
+import 'package:findmepcparts/services/auth_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 import 'package:flutter/material.dart';
@@ -28,33 +29,44 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  runApp(MaterialApp(
-    initialRoute: '/splash',
-    theme: ThemeData.light(),
-    darkTheme: ThemeData.dark(),
-    // themeMode: themeProvider.themeMode,
-    routes: {
-      '/splash': (context) => const SplashScreen(),
-      '/welcome': (context) => const LoginChoiceScreen(),
-      '/signin': (context) => SignInScreen(),
-      '/signup': (context) => ProfileSetupScreen(),
-      '/sales': (context) =>  const OnSale(),
-      '/settings': (context) =>  ChangeNotifierProvider(create: (_) => ThemeProvider(), child: SettingsScreen()),
-      '/profile': (context) => const ProfileScreen(),
-      '/changeDetails': (context) => const ChangeDetailsScreen(),
-      '/about': (context) => const AboutScreen(),
-      '/language': (context) => const LanguageScreen(),
-      '/builder': (context) =>  const NBuildPage(),
+  runApp(ChangeNotifierProvider(
+    create: (_) => AuthService(),
+    child: MainApp(),
+    )
+  );
+}
 
-      
-      '/guides': (context) =>  const Guides(),
-      '/guidesDetails': (context) => const GuidesDetailScreen(),
-      '/community': (context) => const Community(),
-      '/communityDetails': (context) => const CommunityDetailScreen(),
+class MainApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context)
+  {
+    final auth = Provider.of<AuthService>(context);
+    return MaterialApp(
+      initialRoute: '/splash',
+      theme: ThemeData.light(),
+      darkTheme: ThemeData.dark(),
+      // themeMode: themeProvider.themeMode,
+      routes: {
+        '/splash': (context) => const SplashScreen(),
+        '/welcome': (context) => const LoginChoiceScreen(),
+        '/signin': (context) => SignInScreen(),
+        '/signup': (context) => ProfileSetupScreen(),
+        '/sales': (context) =>  const OnSale(),
+        '/settings': (context) =>  ChangeNotifierProvider(create: (_) => ThemeProvider(), child: SettingsScreen()),
+        '/profile': (context) => const ProfileScreen(),
+        '/changeDetails': (context) => const ChangeDetailsScreen(),
+        '/about': (context) => const AboutScreen(),
+        '/language': (context) => const LanguageScreen(),
+        '/builder': (context) =>  const NBuildPage(),
 
-
-    },
-  ));
+        
+        '/guides': (context) =>  const Guides(),
+        '/guidesDetails': (context) => const GuidesDetailScreen(),
+        '/community': (context) => const Community(),
+        '/communityDetails': (context) => const CommunityDetailScreen(),
+      },
+    );
+  }
 }
 
 class ThemeProvider extends ChangeNotifier {

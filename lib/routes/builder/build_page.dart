@@ -7,6 +7,9 @@ import 'package:findmepcparts/routes/builder/part.dart';
 import 'package:findmepcparts/routes/builder/build.dart';
 import 'package:findmepcparts/util/text_styles.dart';
 
+import 'package:provider/provider.dart';
+import 'package:findmepcparts/services/auth_provider.dart';
+
 class NBuildPage extends StatefulWidget {
   const NBuildPage({Key? key}) : super(key: key);
 
@@ -46,6 +49,11 @@ class _BuildPageState extends State<NBuildPage> {
 
   @override
   Widget build(BuildContext context) {
+    final auth = Provider.of<AuthService>(context);
+    String? curr_uid = auth.currentUser?.uid;
+
+    print(curr_uid); // for debugging only.
+    
     return Scaffold(
       bottomNavigationBar: CustomNavBar(),
       backgroundColor: AppColors.bodyBackgroundColor,

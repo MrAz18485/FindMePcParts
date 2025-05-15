@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import "package:findmepcparts/services/auth_gate.dart";
+import "package:findmepcparts/services/auth_provider.dart";
 import '../../util/colors.dart';
 import '../../util/text_styles.dart';
 import '../../util/paddings.dart';
