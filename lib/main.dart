@@ -1,6 +1,7 @@
 import 'package:findmepcparts/routes/guides/guides.dart';
 import 'package:findmepcparts/routes/community/community.dart';
 import 'package:findmepcparts/routes/builder/build_page.dart';
+import 'package:findmepcparts/routes/login_splash/forgot_password.dart';
 import 'package:findmepcparts/routes/login_splash/login_screens.dart';
 import 'package:findmepcparts/routes/login_splash/splash.dart';
 
@@ -58,7 +59,7 @@ class MainApp extends StatelessWidget {
         '/about': (context) => const AboutScreen(),
         '/language': (context) => const LanguageScreen(),
         '/builder': (context) =>  const NBuildPage(),
-
+        '/forgotpassword': (context) => ForgotPasswordScreen(),
         
         '/guides': (context) =>  const Guides(),
         '/guidesDetails': (context) => const GuidesDetailScreen(),

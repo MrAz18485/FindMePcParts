@@ -67,7 +67,6 @@ class SignInScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AuthService _auth = Provider.of<AuthService>(context);
-    final _formKey = GlobalKey<FormState>();
     final emailController = TextEditingController();
     final passwordController = TextEditingController();
     final formKey = GlobalKey<FormState>();
@@ -174,10 +173,7 @@ class SignInScreen extends StatelessWidget {
                   backgroundColor: Colors.black,
                   foregroundColor: Colors.white,
                 ),
-
-                onPressed: () {
-                  
-                },
+                onPressed: () => Navigator.pushNamed(context, '/forgotpassword'),
                 child: const Text('Forgot password?'),
               ),
             ],
