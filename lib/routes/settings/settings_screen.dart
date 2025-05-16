@@ -6,6 +6,7 @@ import '../../util/text_styles.dart';
 import '../../util/paddings.dart';
 import 'package:findmepcparts/nav_bar.dart';
 import '../../main.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 
 
@@ -30,8 +31,8 @@ class SettingsScreen extends StatelessWidget {
           elevation: 0,
           centerTitle: false,
           title:  Text(
-                    'Settings',
-                    style: appBarTitleTextStyle,
+            'Settings',
+            style: appBarTitleTextStyle,
           ),
         ),
       ),
@@ -40,7 +41,22 @@ class SettingsScreen extends StatelessWidget {
         children: [
           Divider(color: Colors.black,),
 
-          _settingsTile(context, Icons.person, 'Profile', '/profile', iconColor, textColor),
+          ListTile(
+            leading: Icon(Icons.person, size: 28, color: iconColor),
+            title: Text('Profile', style: settingsTitle.copyWith(color: textColor)),
+            onTap: () {
+              if (FirebaseAuth.instance.currentUser != null) {
+                Navigator.pushNamed(context, '/profile');
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Please log in to view your profile.'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+          ),
           _settingsTile(context, Icons.language, 'Language', '/language', iconColor, textColor),
           ListTile(
             leading: Icon(Icons.remove_red_eye, size: 28, color: iconColor),
@@ -65,7 +81,7 @@ class SettingsScreen extends StatelessWidget {
           Divider(color: Colors.black),
         ],
       ),
-          bottomNavigationBar: CustomNavBar(),
+      bottomNavigationBar: CustomNavBar(),
     );
   }
 
