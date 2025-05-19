@@ -1,13 +1,24 @@
+import 'package:findmepcparts/services/auth_provider.dart';
 import 'package:findmepcparts/util/text_styles.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final auth = Provider.of<AuthService>(context);
     Future.delayed(const Duration(seconds: 2), () {
-      Navigator.pushReplacementNamed(context, '/welcome');
+      print(auth.currentUser?.uid); // returns null when user is not logged in. For debugging
+      if (auth.currentUser == null)
+      {
+        Navigator.pushReplacementNamed(context, '/welcome');
+      }
+      else
+      {
+        Navigator.pushReplacementNamed(context, "/builder");
+      }
     });
 
     return Scaffold(

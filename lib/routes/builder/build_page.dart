@@ -52,10 +52,16 @@ class _BuildPageState extends State<NBuildPage> {
       print('Current user ID: ${user.uid}');
       
       final List<Map<String, dynamic>> buildData = await _databaseService.fetchBuilds(_username);
-      print('Fetched build data: $buildData');
+      List<String> build_ids = [];
+
+      buildData.forEach((element) {
+        build_ids.add(element["id"]);
+      },);
+
+      print('Fetched build data: $build_ids');
       
       setState(() {
-        builds = buildData.map((data) => Build.fromMap(data)).toList();
+        builds = buildData.map((data) => Build.fromMap(data, data["id"])).toList();
         isLoading = false;
       });
     } catch (e) {
@@ -163,6 +169,7 @@ class _BuildPageState extends State<NBuildPage> {
                     IconButton(
                       icon: const Icon(Icons.delete, color: AppColors.flameColor),
                       onPressed: () async {
+                        print(build.id);
                         if (build.id != null) {
                           await _databaseService.deleteBuild(build.id!);
                           setState(() {

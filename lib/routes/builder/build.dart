@@ -13,9 +13,9 @@ class Build {
     this.isExpanded = false,
   });
 
-  factory Build.fromMap(Map<String, dynamic> map, {String? documentId}) {
-    return Build(
-      id: documentId,
+  factory Build.fromMap(Map<String, dynamic> map, String? documentId) { // burada documentID optional parameter
+    return Build(                                                         // build_page 64. satırda parametre geçmiyoruz
+      id: documentId,                                                     // bundan dolayı id build'lere kaydedilmiyor.
       name: map['name'] ?? '',
       parts: (map['parts'] as List<dynamic>? ?? [])
           .map((partMap) => Part.fromMap(partMap as Map<String, dynamic>))
@@ -26,6 +26,7 @@ class Build {
 
   Map<String, dynamic> toMap() {
     return {
+      'id': id,
       'name': name,
       'parts': parts.map((part) => part.toMap()).toList(),
       'isExpanded': isExpanded,

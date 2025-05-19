@@ -1,5 +1,6 @@
 import 'package:findmepcparts/util/colors.dart';
 import 'package:findmepcparts/util/text_styles.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
@@ -10,7 +11,7 @@ import 'package:email_validator/email_validator.dart';
 
 class LoginChoiceScreen extends StatelessWidget {
   const LoginChoiceScreen({super.key});
-
+    
   @override
   Widget build(BuildContext context) {
     return Scaffold(
