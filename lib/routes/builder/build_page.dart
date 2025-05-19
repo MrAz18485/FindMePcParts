@@ -2,7 +2,6 @@ import 'package:findmepcparts/nav_bar.dart';
 import 'package:findmepcparts/services/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:findmepcparts/util/colors.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'new_build_screen.dart';
 import 'select_part_screen.dart';
 import 'package:findmepcparts/routes/builder/part.dart';
@@ -54,6 +53,7 @@ class _BuildPageState extends State<NBuildPage> {
         });
         return;
       }
+      
       print('Current user: ${user.displayName}');
       print('Current user ID: ${user.uid}');
       
@@ -70,7 +70,6 @@ class _BuildPageState extends State<NBuildPage> {
         builds = buildData.map((data) => Build.fromMap(data, data["id"])).toList();
         isLoading = false;
       });
-
     } catch (e) {
       print('Error loading builds: $e');
       setState(() {
@@ -277,6 +276,7 @@ class _BuildPageState extends State<NBuildPage> {
                   MaterialPageRoute(
                     builder: (context) => SelectPartScreen(
                       category: part.category,
+                      selectedParts: build.parts,
                     ),
                   ),
                 );
