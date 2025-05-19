@@ -6,6 +6,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'select_part_screen.dart'; // import for part picking
 
+
+
 class NewBuildScreen extends StatefulWidget {
   const NewBuildScreen({Key? key}) : super(key: key);
 
@@ -86,7 +88,7 @@ class _NewBuildScreenState extends State<NewBuildScreen> {
                 );
                 String buildId = await _databaseService.saveBuild(_username, newBuild);
                 newBuild.id = buildId;
-                Navigator.of(context).pop(newBuild);
+                Navigator.of(context).pop(newBuild); // page is popped, return newBuild as param. to prev page
               }
             },
             child: const Text(

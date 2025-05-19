@@ -2,6 +2,7 @@ import 'package:findmepcparts/nav_bar.dart';
 import 'package:findmepcparts/services/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:findmepcparts/util/colors.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'new_build_screen.dart';
 import 'select_part_screen.dart';
 import 'package:findmepcparts/routes/builder/part.dart';
@@ -22,6 +23,8 @@ class NBuildPage extends StatefulWidget {
 
 class _BuildPageState extends State<NBuildPage> {
   List<Build> builds = [];
+  List<Build> local_builds = [];
+
   final DatabaseService _databaseService = DatabaseService(uid: FirebaseAuth.instance.currentUser?.uid ?? '');
   final String _username = FirebaseAuth.instance.currentUser?.displayName ?? '';
   bool isLoading = true;
@@ -42,12 +45,15 @@ class _BuildPageState extends State<NBuildPage> {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
         print('Error: User is not authenticated');
+        final List<Map<String, dynamic>> local_build_data = await _databaseService.fetchBuilds(_username);
+        print("Local builds: $local_build_data");
+        
         setState(() {
+          local_builds = local_build_data.map((data) => Build.fromMap(data, data["id"])).toList();
           isLoading = false;
         });
         return;
       }
-      
       print('Current user: ${user.displayName}');
       print('Current user ID: ${user.uid}');
       
@@ -64,6 +70,7 @@ class _BuildPageState extends State<NBuildPage> {
         builds = buildData.map((data) => Build.fromMap(data, data["id"])).toList();
         isLoading = false;
       });
+
     } catch (e) {
       print('Error loading builds: $e');
       setState(() {
@@ -109,7 +116,14 @@ class _BuildPageState extends State<NBuildPage> {
               final newBuild = await Navigator.of(context).push(_createRoute());
               if (newBuild != null && newBuild is Build) {
                 setState(() {
-                  builds.add(newBuild);
+                  if (auth.currentUser != null)
+                  {
+                    builds.add(newBuild);
+                  }
+                  else
+                  {
+                    local_builds.add(newBuild);
+                  }
                 });
               }
             },
@@ -118,21 +132,30 @@ class _BuildPageState extends State<NBuildPage> {
       ),
       body: isLoading 
         ? const Center(child: CircularProgressIndicator())
-        : builds.isEmpty
+        : (builds.isEmpty && local_builds.isEmpty) 
           ? const Center(child: Text('No builds yet. Create your first build!'))
           : Padding(
         padding: const EdgeInsets.all(16),
-        child: ListView.builder(
+        child: 
+        (auth.currentUser != null) ?
+        ListView.builder(
           itemCount: builds.length,
           itemBuilder: (context, index) {
             return buildCard(builds[index], index);
-          },
-        ),
+          }
+        ) : 
+        ListView.builder(
+          itemCount: local_builds.length,
+          itemBuilder: (context, index) {
+            return buildCard(local_builds[index], index);
+          }
+        )
       ),
     );
   }
 
   Widget buildCard(Build build, int buildIndex) {
+    final auth = Provider.of<AuthService>(context);
     return Card(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8), 
@@ -173,7 +196,14 @@ class _BuildPageState extends State<NBuildPage> {
                         if (build.id != null) {
                           await _databaseService.deleteBuild(build.id!);
                           setState(() {
-                            builds.removeAt(buildIndex);
+                            if (auth.currentUser != null)
+                            {
+                              builds.removeAt(buildIndex);
+                            }
+                            else
+                            {
+                              local_builds.removeAt(buildIndex);
+                            }
                           });
                         }
                       },

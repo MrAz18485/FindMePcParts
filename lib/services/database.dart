@@ -79,7 +79,7 @@ class DatabaseService {
   Future<String> saveBuild(String username, Build build) async {
     if (isGuest) {
       final prefs = await SharedPreferences.getInstance();
-      List<Map<String, dynamic>> builds = _cachedGuestBuilds ?? [];
+      List<Map<String, dynamic>> builds = _cachedGuestBuilds ?? []; // if cachedGuestBuilds null, then set it to []
 
       Map<String, dynamic> buildData = build.toMap();
       buildData['id'] = DateTime.now().millisecondsSinceEpoch.toString();
@@ -138,7 +138,6 @@ class DatabaseService {
   // 🗑️ Build Silme
   Future<void> deleteBuild(String buildId) async {
     if (!isGuest) {
-      print("Here");
       final prefs = await SharedPreferences.getInstance();
       List<Map<String, dynamic>> builds = _cachedGuestBuilds ?? [];
 
