@@ -46,20 +46,31 @@ class PartOption {
       return val.toString();
     }
 
-    if (cat.contains('cpu')) {
-      if (attributes['core_clock'] != null) formattedAttrs.add(getFirst(attributes['core_clock']));
+    if (cat.contains('cooler')) {
+      if (attributes['fan_rpm'] != null) formattedAttrs.add('Fan: ${getFirst(attributes['fan_rpm'])}');
+      if (attributes['noise_level'] != null) formattedAttrs.add('Noise: ${getFirst(attributes['noise_level'])}');
+      if (attributes['water_cooled'] != null) formattedAttrs.add('Water Cooled: ${getFirst(attributes['water_cooled'])}');
+    }
+    else if (cat.contains('cpu')) {
+      if (attributes['core_clock'] != null) formattedAttrs.add('Core: ${getFirst(attributes['core_clock'])}');
       if (attributes['boost_clock'] != null) formattedAttrs.add('Boost: ${getFirst(attributes['boost_clock'])}');
       if (attributes['core_count'] != null && attributes['thread_count'] != null) {
-        formattedAttrs.add('${getFirst(attributes['core_count'])}C/${getFirst(attributes['thread_count'])}T');
+        formattedAttrs.add('${getFirst(attributes['core_count'])} C / ${getFirst(attributes['thread_count'])} T');
       }
-      if (attributes['l3_cache'] != null) formattedAttrs.add('L3: ${getFirst(attributes['l3_cache'])}');
+      if (attributes['l2_cache'] != null) formattedAttrs.add('L2: ${getFirst(attributes['l2_cache'])}');
+      if (attributes['l3_cache'] != null) formattedAttrs.add('L3: ${getFirst(attributes['l3_cache'])}');  
       if (attributes['socket'] != null) formattedAttrs.add(getFirst(attributes['socket']));
+
     } else if (cat.contains('gpu')) {
       if (attributes['chipset'] != null) formattedAttrs.add(getFirst(attributes['chipset']));
-      if (attributes['memory'] != null) formattedAttrs.add(getFirst(attributes['memory']));
+      if (attributes['chipset'] != null && !attributes['chipset'].contains('GB') && attributes['memory'] != null) {
+        formattedAttrs.add(getFirst(attributes['memory']));
+      }   
+      if (attributes['memory_type'] != null) formattedAttrs.add(getFirst(attributes['memory_type']));   
       if (attributes['core_clock'] != null) formattedAttrs.add('Core: ${getFirst(attributes['core_clock'])}');
       if (attributes['boost_clock'] != null) formattedAttrs.add('Boost: ${getFirst(attributes['boost_clock'])}');
       if (attributes['cooling'] != null) formattedAttrs.add(getFirst(attributes['cooling']));
+      
     } else if (cat.contains('memory')) {
       if (attributes['modules'] != null && attributes['modules'].toString().isNotEmpty) {
         formattedAttrs.add(getFirst(attributes['modules']));
@@ -80,22 +91,22 @@ class PartOption {
     } else if (cat.contains('case')) {
       if (attributes['type'] != null) formattedAttrs.add(getFirst(attributes['type']));
       if (attributes['form_factor'] != null) formattedAttrs.add(getFirst(attributes['form_factor']));
-    } else if (cat.contains('cpu cooler')) {
-      String fan = '-';
-      if (attributes['fan_rpm'] != null && attributes['fan_rpm'].toString().isNotEmpty) fan = getFirst(attributes['fan_rpm']);
-      else if (attributes['fan_speed'] != null && attributes['fan_speed'].toString().isNotEmpty) fan = getFirst(attributes['fan_speed']);
-      formattedAttrs.add(fan);
-      String noise = '-';
-      if (attributes['noise_level'] != null && attributes['noise_level'].toString().isNotEmpty) noise = getFirst(attributes['noise_level']);
-      formattedAttrs.add(noise);
-    } else if (cat.contains('motherboard')) {
+      if (attributes['dimensions'] != null && attributes['dimensions'][0] != null) {
+        String dims = getFirst(attributes['dimensions'][0]);
+        // Örneğin 'x' karakteri ile bölüp alt alta yazalım:
+        List<String> parts = dims.split(' x ');
+        String formattedDimensions = parts.join('\n'); // Satırlara böldük
+        formattedAttrs.add('Dimension:\n$formattedDimensions');
+      }
+
+      } else if (cat.contains('motherboard')) {
       if (attributes['chipset'] != null) formattedAttrs.add(getFirst(attributes['chipset']));
       if (attributes['socket'] != null) formattedAttrs.add(getFirst(attributes['socket']));
       if (attributes['memory_type'] != null) formattedAttrs.add(getFirst(attributes['memory_type']));
       if (attributes['form_factor'] != null) formattedAttrs.add(getFirst(attributes['form_factor']));
         }
 
-    return formattedAttrs.where((e) => e.isNotEmpty).join(' • ');
+    return formattedAttrs.where((e) => e.isNotEmpty).join('\n');
   }
 
   Part toPart() {
@@ -105,16 +116,19 @@ class PartOption {
       price: double.tryParse(price.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0,
       imageUrl: image,
       buyUrl: buyUrl,
+      attributes: attributes,
     );
   }
 }
 
 class SelectPartScreen extends StatefulWidget {
   final String category;
+  final List<Part> selectedParts;
   
   const SelectPartScreen({
     Key? key, 
     required this.category,
+    required this.selectedParts,
   }) : super(key: key);
 
   @override
@@ -150,50 +164,70 @@ class _SelectPartScreenState extends State<SelectPartScreen> {
         isLoading = true;
       });
       
-      print('Loading parts for category: ${widget.category}');
-      final List<Map<String, dynamic>> partData = await _databaseService.fetchPartsByCategory(widget.category);
-      print('Fetched parts data: $partData');
+      final List<Map<String, dynamic>> partData = await _databaseService.fetchPartsByCategory(
+        widget.category,
+        selectedParts: widget.selectedParts,
+      );
       
       if (mounted) {
-      setState(() {
+        setState(() {
           parts = partData.map((data) {
-            print('Processing part data: $data');
             final part = PartOption.fromMap(data);
-            print('Converted part: ${part.name} - Attributes: ${part.attributes}');
             return part;
           }).toList();
-        isLoading = false;
-      });
+          isLoading = false;
+        });
       }
     } catch (e) {
       print('Error loading parts: $e');
       if (mounted) {
-      setState(() {
-        isLoading = false;
-      });
+        setState(() {
+          isLoading = false;
+        });
       }
     }
   }
 
   List<PartOption> get filteredParts {
-    return parts.where((part) {
-      final matchesSearch = part.name.toLowerCase().contains(searchQuery.toLowerCase());
-      final priceValue = double.tryParse(part.price.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0;
-      final matchesPrice = priceValue >= minPrice && priceValue <= maxPrice;
-      return matchesSearch && matchesPrice;
-    }).toList()
-      ..sort((a, b) {
-        final priceA = double.tryParse(a.price.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0;
-        final priceB = double.tryParse(b.price.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0;
-        
-        if (selectedSortBy == 'price') {
-          return selectedSortOrder == 'ascending' 
-              ? priceA.compareTo(priceB)
-              : priceB.compareTo(priceA);
+  return parts.where((part) {
+    final lowerQuery = searchQuery.toLowerCase();
+
+    // Ürün ismine göre arama
+    final matchesName = part.name.toLowerCase().contains(lowerQuery);
+
+    // Attributes içindeki tüm string değerleri birleştir
+    final attributesText = part.attributes.values
+      .where((attr) => attr != null)
+      .map((attr) {
+        if (attr is List) {
+          return attr.join(' ').toLowerCase();
+        } else {
+          return attr.toString().toLowerCase();
         }
-        return 0;
-      });
-  }
+      })
+      .join(' ');
+
+    // Attributes içinde arama
+    final matchesAttributes = attributesText.contains(lowerQuery);
+
+    final priceValue = double.tryParse(part.price.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0;
+    final matchesPrice = priceValue >= minPrice && priceValue <= maxPrice;
+
+    // İsim veya attributes'da arama varsa kabul et
+    return (matchesName || matchesAttributes) && matchesPrice;
+  }).toList()
+    ..sort((a, b) {
+      final priceA = double.tryParse(a.price.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0;
+      final priceB = double.tryParse(b.price.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0;
+
+      if (selectedSortBy == 'price') {
+        return selectedSortOrder == 'ascending' 
+            ? priceA.compareTo(priceB)
+            : priceB.compareTo(priceA);
+      }
+      return 0;
+    });
+}
 
   @override
   Widget build(BuildContext context) {
@@ -295,8 +329,6 @@ class _SelectPartScreenState extends State<SelectPartScreen> {
                                   fontWeight: FontWeight.w600,
                                   color: Colors.black87,
                                   ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
@@ -306,8 +338,6 @@ class _SelectPartScreenState extends State<SelectPartScreen> {
                                   fontWeight: FontWeight.w500,
                                   color: Colors.black54,
                                 ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
                               ),
                               const SizedBox(height: 8),
                               Text(

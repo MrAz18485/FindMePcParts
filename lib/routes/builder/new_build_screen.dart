@@ -6,8 +6,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'select_part_screen.dart'; // import for part picking
 
-
-
 class NewBuildScreen extends StatefulWidget {
   const NewBuildScreen({Key? key}) : super(key: key);
 
@@ -58,6 +56,7 @@ class _NewBuildScreenState extends State<NewBuildScreen> {
 
   @override
   Widget build(BuildContext context) {
+    print(selectedParts);
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -88,7 +87,7 @@ class _NewBuildScreenState extends State<NewBuildScreen> {
                 );
                 String buildId = await _databaseService.saveBuild(_username, newBuild);
                 newBuild.id = buildId;
-                Navigator.of(context).pop(newBuild); // page is popped, return newBuild as param. to prev page
+                Navigator.of(context).pop(newBuild);
               }
             },
             child: const Text(
@@ -162,6 +161,7 @@ class _NewBuildScreenState extends State<NewBuildScreen> {
             MaterialPageRoute(
               builder: (context) => SelectPartScreen(
                 category: partNames[index],
+                selectedParts: selectedParts,
               ),
             ),
           );

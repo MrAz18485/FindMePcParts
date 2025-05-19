@@ -3,6 +3,7 @@ import 'package:findmepcparts/routes/builder/build.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:findmepcparts/routes/builder/part.dart';
 
 class DatabaseService {
   final String uid;
@@ -79,7 +80,7 @@ class DatabaseService {
   Future<String> saveBuild(String username, Build build) async {
     if (isGuest) {
       final prefs = await SharedPreferences.getInstance();
-      List<Map<String, dynamic>> builds = _cachedGuestBuilds ?? []; // if cachedGuestBuilds null, then set it to []
+      List<Map<String, dynamic>> builds = _cachedGuestBuilds ?? [];
 
       Map<String, dynamic> buildData = build.toMap();
       buildData['id'] = DateTime.now().millisecondsSinceEpoch.toString();
@@ -91,7 +92,6 @@ class DatabaseService {
     } else {
       DocumentReference docRef = await buildsCollection.add({
         'uid': uid,
-        'username': username,
         'name': build.name,
         'parts': build.parts.map((part) => {
           'name': part.name,
@@ -99,7 +99,6 @@ class DatabaseService {
           'price': part.price,
           'imageUrl': part.imageUrl,
         }).toList(),
-        'isExpanded': build.isExpanded,
         'createdAt': FieldValue.serverTimestamp(),
       });
       return docRef.id;
@@ -129,7 +128,6 @@ class DatabaseService {
           'price': part.price,
           'imageUrl': part.imageUrl,
         }).toList(),
-        'isExpanded': build.isExpanded,
         'updatedAt': FieldValue.serverTimestamp(),
       });
     }
@@ -138,6 +136,7 @@ class DatabaseService {
   // 🗑️ Build Silme
   Future<void> deleteBuild(String buildId) async {
     if (!isGuest) {
+      print("Here");
       final prefs = await SharedPreferences.getInstance();
       List<Map<String, dynamic>> builds = _cachedGuestBuilds ?? [];
 
@@ -158,34 +157,82 @@ class DatabaseService {
     return qs.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
   }
 
-  Future<List<Map<String, dynamic>>> fetchPartsByCategory(String category) async {
-    try {
-      String collectionName = '';
-      switch (category.toLowerCase()) {
-        case 'processor (cpu)': collectionName = 'CPUs'; break;
-        case 'gpu': collectionName = 'GPUs'; break;
-        case 'cpu cooler': collectionName = 'cpu_coolers'; break;
-        case 'motherboard': collectionName = 'motherboards'; break;
-        case 'memory': collectionName = 'memory'; break;
-        case 'storage': collectionName = 'storages'; break;
-        case 'power supply': collectionName = 'psu'; break;
-        case 'case': collectionName = 'cases'; break;
-        default:
-          print('Unknown category: $category');
-          return [];
-      }
-
-      QuerySnapshot qs = await FirebaseFirestore.instance.collection(collectionName).get();
-
-      return qs.docs.map((doc) {
-        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-        data['id'] = doc.id;
-        data['category'] = category;
-        return data;
-      }).toList();
-    } catch (e) {
-      print('Error in fetchPartsByCategory: $e');
-      rethrow;
+Future<List<Map<String, dynamic>>> fetchPartsByCategory(String category, {List<Part>? selectedParts}) async {
+  try {
+    String collectionName = '';
+    switch (category.toLowerCase()) {
+      case 'processor (cpu)': collectionName = 'CPUs'; break;
+      case 'gpu': collectionName = 'GPUs'; break;
+      case 'cpu cooler': collectionName = 'cpu_coolers'; break;
+      case 'motherboard': collectionName = 'motherboards'; break;
+      case 'memory': collectionName = 'memory'; break;
+      case 'storage': collectionName = 'storages'; break;
+      case 'power supply': collectionName = 'psu'; break;
+      case 'case': collectionName = 'cases'; break;
+      default:
+        print('Unknown category: $category');
+        return [];
     }
+
+    QuerySnapshot qs;
+
+    // CPU seçiliyse -> uyumlu CPU Cooler'ları getir
+    if (category.toLowerCase() == 'cpu cooler' && selectedParts != null && selectedParts[0].price > 0) {
+      String cpuSocket = selectedParts[0].attributes['socket'] ?? '';
+      if (cpuSocket.isNotEmpty) {
+        qs = await FirebaseFirestore.instance
+            .collection(collectionName)
+            .where('cpu_socket', arrayContains: cpuSocket)
+            .get();
+      } else {
+        qs = await FirebaseFirestore.instance.collection(collectionName).get();
+      }
+    }
+
+    // Cooler seçiliyse -> uyumlu CPU'ları getir
+    else if (category.toLowerCase() == 'processor (cpu)' && selectedParts != null && selectedParts.length > 1 && selectedParts[1].price > 0) {
+      List<String> cpuSockets = List<String>.from(selectedParts[1].attributes['cpu_socket'] ?? []);
+
+      if (cpuSockets.isNotEmpty) {
+        if (cpuSockets.length <= 10) {
+          qs = await FirebaseFirestore.instance
+              .collection(collectionName)
+              .where('socket', whereIn: cpuSockets)
+              .get();
+        } else {
+          // whereIn sınırını aştıysa elle filtrele
+          final all = await FirebaseFirestore.instance.collection(collectionName).get();
+          final filtered = all.docs.where((doc) {
+            final socket = doc['socket'];
+            return cpuSockets.contains(socket);
+          }).toList();
+
+          return filtered.map((doc) {
+            Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+            data['id'] = doc.id;
+            data['category'] = category;
+            return data;
+          }).toList();
+        }
+      } else {
+        qs = await FirebaseFirestore.instance.collection(collectionName).get();
+      }
+    }
+
+    // Diğer kategoriler
+    else {
+      qs = await FirebaseFirestore.instance.collection(collectionName).get();
+    }
+
+    return qs.docs.map((doc) {
+      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+      data['id'] = doc.id;
+      data['category'] = category;
+      return data;
+    }).toList();
+  } catch (e) {
+    print('Error in fetchPartsByCategory: $e');
+    rethrow;
   }
+}
 }
