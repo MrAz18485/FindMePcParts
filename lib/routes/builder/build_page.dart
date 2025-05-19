@@ -2,6 +2,7 @@ import 'package:findmepcparts/nav_bar.dart';
 import 'package:findmepcparts/services/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:findmepcparts/util/colors.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'new_build_screen.dart';
 import 'select_part_screen.dart';
 import 'package:findmepcparts/routes/builder/part.dart';
@@ -229,6 +230,7 @@ class _BuildPageState extends State<NBuildPage> {
   }
 
   Widget buildPartItem(Build build, int buildIndex, Part part, int partIndex) {
+    final auth = Provider.of<AuthService>(context);
     return Card(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),

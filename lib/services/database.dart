@@ -135,15 +135,18 @@ class DatabaseService {
 
   // 🗑️ Build Silme
   Future<void> deleteBuild(String buildId) async {
+    final prefs = await SharedPreferences.getInstance();
     if (!isGuest) {
-      print("Here");
-      final prefs = await SharedPreferences.getInstance();
       List<Map<String, dynamic>> builds = _cachedGuestBuilds ?? [];
 
       builds.removeWhere((build) => build['id'] == buildId);
       _cachedGuestBuilds = builds;
       await prefs.setString(_guestBuildsKey, jsonEncode(builds));
       await buildsCollection.doc(buildId).delete();
+    }
+    else
+    {
+      prefs.remove(_guestBuildsKey);
     }
   }
 
