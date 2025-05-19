@@ -70,15 +70,22 @@ class SettingsScreen extends StatelessWidget {
           ),
           Divider(color: Colors.black,),
           _settingsTile(context, Icons.info, 'About', '/about', iconColor, textColor),
-          ListTile(
+          FirebaseAuth.instance.currentUser != null
+              ? ListTile(
             leading: Icon(Icons.logout, size: 28, color: iconColor),
             title: Text('Log Out', style: settingsTitle.copyWith(color: textColor)),
             onTap: () async {
               await _auth.signOut();
-              Navigator.pushNamedAndRemoveUntil(context, '/welcome', (route) => false,);   // successful login       
+              Navigator.pushNamedAndRemoveUntil(context, '/welcome', (route) => false,);   // successful login
+            },
+          )
+              : ListTile(
+            leading: Icon(Icons.login, size: 28, color: iconColor),
+            title: Text('Log In', style: settingsTitle.copyWith(color: textColor)),
+            onTap: () async {
+              Navigator.pushNamedAndRemoveUntil(context, '/welcome', (route) => false,);
             },
           ),
-          Divider(color: Colors.black),
         ],
       ),
       bottomNavigationBar: CustomNavBar(),

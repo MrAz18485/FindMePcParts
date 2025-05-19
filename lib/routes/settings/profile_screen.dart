@@ -127,9 +127,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              onPressed: () {
+              onPressed: () async {
                 if (FirebaseAuth.instance.currentUser != null) {
-                  Navigator.pushNamed(context, '/changeDetails');
+                  await Navigator.pushNamed(context, '/changeDetails');
+                  if (mounted) {
+                    _loadUserData();
+                  }
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(

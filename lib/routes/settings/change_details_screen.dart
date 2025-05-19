@@ -21,6 +21,9 @@ class _ChangeDetailsScreenState extends State<ChangeDetailsScreen> {
   final _newPasswordController = TextEditingController();
   final _currentPasswordController = TextEditingController();
 
+  String _initialUsername = '';
+  String _initialEmail = '';
+
   bool _isLoadingSubmit = false;
   bool _isFetchingInitialDetails = true;
 
@@ -33,22 +36,28 @@ class _ChangeDetailsScreenState extends State<ChangeDetailsScreen> {
   Future<void> _loadCurrentUserDetails() async {
     User? currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser != null) {
-      _emailController.text = currentUser.email ?? '';
+      _initialEmail = currentUser.email ?? '';
+      _emailController.text = _initialEmail;
       try {
         DocumentSnapshot userData = await FirebaseFirestore.instance
             .collection('users')
             .doc(currentUser.uid)
             .get();
         if (userData.exists) {
-          _usernameController.text = userData.get('username') ?? '';
+          _initialUsername = userData.get('username') ?? '';
+          _usernameController.text = _initialUsername;
         } else {
+          _initialUsername = '';
           _usernameController.text = '';
         }
       } catch (e) {
         print("Error loading current username: $e");
+        _initialUsername = '';
         _usernameController.text = '';
       }
     } else {
+      _initialUsername = '';
+      _initialEmail = '';
       _usernameController.text = '';
       _emailController.text = '';
     }
@@ -117,8 +126,12 @@ class _ChangeDetailsScreenState extends State<ChangeDetailsScreen> {
     List<String> successMessages = [];
     List<String> errorMessages = [];
 
-    if (newUsername.isEmpty && newEmail.isEmpty && newPassword.isEmpty) {
-      _showFeedbackDialog("No Changes Made", "You haven't updated any fields that initiated a change.");
+    bool usernameActuallyChanged = newUsername.isNotEmpty && newUsername != _initialUsername;
+    bool emailActuallyChanged = newEmail.isNotEmpty && newEmail != _initialEmail;
+    bool passwordActuallyChanged = newPassword.isNotEmpty;
+
+    if (!usernameActuallyChanged && !emailActuallyChanged && !passwordActuallyChanged) {
+      _showFeedbackDialog("No Changes", "No actual changes were made to submit.");
       setState(() {
         _isLoadingSubmit = false;
       });
@@ -126,23 +139,25 @@ class _ChangeDetailsScreenState extends State<ChangeDetailsScreen> {
     }
 
     // Update Username
-    if (newUsername.isNotEmpty) {
+    if (usernameActuallyChanged) {
       final result = await _authService.updateUsername(newUsername);
       if (result == null) {
         successMessages.add("Username updated.");
+        _initialUsername = newUsername;
       } else {
         errorMessages.add("Username update failed: $result");
       }
     }
 
     // Update Email
-    if (newEmail.isNotEmpty) {
+    if (emailActuallyChanged) {
       if (!_isValidEmail(newEmail)) {
         errorMessages.add("Invalid email format.");
       } else {
         final result = await _authService.updateUserEmail(newEmail);
         if (result == null) {
           successMessages.add("Email updated.");
+          _initialEmail = newEmail;
         } else {
           errorMessages.add("Email update failed: $result");
         }
@@ -150,7 +165,7 @@ class _ChangeDetailsScreenState extends State<ChangeDetailsScreen> {
     }
 
     // Update Password
-    if (newPassword.isNotEmpty) {
+    if (passwordActuallyChanged) {
       if (currentPassword.isEmpty) {
         errorMessages.add("Current password is required to change your password.");
       } else {
@@ -173,16 +188,17 @@ class _ChangeDetailsScreenState extends State<ChangeDetailsScreen> {
 
     if (successMessages.isNotEmpty) {
       _showSnackBar(successMessages.join(" ") + (errorMessages.isNotEmpty ? " Some updates failed." : " All changes successful!"));
-      if (successMessages.any((msg) => msg.contains("Username")) && !errorMessages.any((err) => err.contains("Username"))) _usernameController.text = newUsername;
-      if (successMessages.any((msg) => msg.contains("Email")) && !errorMessages.any((err) => err.contains("Email"))) _emailController.text = newEmail;
-
-      _newPasswordController.clear();
-      _currentPasswordController.clear();
-
-      if (errorMessages.isEmpty && successMessages.isNotEmpty) {
+      if (successMessages.any((msg) => msg.contains("Username")) && !errorMessages.any((err) => err.contains("Username"))) {
       }
-    } else if (successMessages.isEmpty && errorMessages.isEmpty && (newUsername.isNotEmpty || newEmail.isNotEmpty || newPassword.isNotEmpty)) {
-      _showSnackBar("No changes applied. Ensure new values are different or fields are filled correctly.");
+      if (successMessages.any((msg) => msg.contains("Email")) && !errorMessages.any((err) => err.contains("Email"))) {
+      }
+
+      if (passwordActuallyChanged && successMessages.any((msg) => msg.contains("Password")) && !errorMessages.any((err) => err.contains("Password"))) {
+        _newPasswordController.clear();
+        _currentPasswordController.clear();
+      }
+    } else if (successMessages.isEmpty && errorMessages.isEmpty && (usernameActuallyChanged || emailActuallyChanged || passwordActuallyChanged)) {
+      _showSnackBar("No changes were applied. Ensure new values are valid and different from original values.");
     }
   }
 
