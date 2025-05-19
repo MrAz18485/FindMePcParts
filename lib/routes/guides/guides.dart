@@ -2,6 +2,8 @@ import 'package:findmepcparts/nav_bar.dart';
 import 'package:findmepcparts/util/colors.dart';
 import 'package:findmepcparts/util/text_styles.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 
 class Guides extends StatefulWidget {
@@ -14,154 +16,145 @@ class Guides extends StatefulWidget {
 class _Guides extends State<Guides> {
   int _selectedCategoryIndex = 0;
   final List<String> categories = ["Entry Level", "Mid Range", "High End"];
+  bool isLoading = true;
+  Map<String, List<Map<String, dynamic>>> guideItems = {};
 
-  final Map<String, List<Map<String, String>>> guideItems = {
-    "Entry Level": [
-      {
-        "title": "Intel Entry Level",
-        "cpu": "Intel Core i3-14100F",
-        "gpu": "NVIDIA GeForce GTX 1650",
-        "ram": "16GB DDR4",
-        "price": "\$663.12",
-        "cooler": "Cooler Master Hyper 212",
-        "case": "NZXT H510"
-      },
-      {
-        "title": "AMD Entry Level",
-        "cpu": "AMD Ryzen 5 5500",
-        "gpu": "AMD Radeon RX 6600",
-        "ram": "16GB DDR4",
-        "price": "\$634.34",
-        "cooler": "Cooler Master Hyper 212",
-        "case": "NZXT H510"
-      },
-    ],
-    "Mid Range": [
-      {
-        "title": "Intel Mid Range",
-        "cpu": "Intel Core i5-13400F",
-        "gpu": "NVIDIA RTX 4060 Ti",
-        "ram": "32GB DDR4",
-        "price": "\$1234.56",
-        "cooler": "Noctua NH-D15",
-        "case": "Fractal Design Meshify C"
-      },
-      {
-        "title": "AMD Mid Range",
-        "cpu": "AMD Ryzen 5 7600",
-        "gpu": "AMD Radeon RX 7700 XT",
-        "ram": "32GB DDR5",
-        "price": "\$1345.77",
-        "cooler": "Noctua NH-D15",
-        "case": "Fractal Design Meshify C"
-      },
-    ],
-    "High End": [
-      {
-        "title": "Intel High End",
-        "cpu": "Intel Core i7-14700K",
-        "gpu": "NVIDIA GeForce RTX 4080",
-        "ram": "32GB DDR5",
-        "price": "\$2427.89",
-        "cooler": "Corsair H150i",
-        "case": "Lian Li PC-O11 Dynamic"
-      },
-      {
-        "title": "AMD High End",
-        "cpu": "AMD Ryzen 9 7950X3D",
-        "gpu": "AMD Radeon RX 7900 XTX",
-        "ram": "32GB DDR5",
-        "price": "\$2354.03",
-        "cooler": "Corsair H150i",
-        "case": "Lian Li PC-O11 Dynamic"
-      },
-    ],
-  };
+  @override
+  void initState() {
+    super.initState();
+    _loadGuides();
+  }
 
- @override
-Widget build(BuildContext context) {
-  String selectedCategory = categories[_selectedCategoryIndex];
-  List<Map<String, String>> selectedGuides = guideItems[selectedCategory]!;
+  Future<void> _loadGuides() async {
+    try {
+      final guidesSnapshot = await FirebaseFirestore.instance.collection('guides').get();
+      final guides = guidesSnapshot.docs;
+      
+      // Initialize guideItems with empty lists
+      for (var category in categories) {
+        guideItems[category] = [];
+      }
 
-  return Scaffold(
-    backgroundColor: AppColors.bodyBackgroundColor,
-    body: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 50),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Text(
-            "Guides",
-            style: appBarTitleTextStyle,
-          ),
-        ),
-        const SizedBox(height: 10),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Row(
-            children: categories
-                .asMap()
-                .entries
-                .map((entry) => Padding(
-                      padding: const EdgeInsets.only(right: 10),
-                      child: FilterChip(
-                        label: Text(
-                          entry.value,
-                          style: TextStyle(
-                            color: _selectedCategoryIndex == entry.key ? Colors.white : Colors.black,
-                          ),
-                        ),
-                        selected: _selectedCategoryIndex == entry.key,
-                        onSelected: (_) {
-                          setState(() {
-                            _selectedCategoryIndex = entry.key;
-                          });
-                        },
-                        selectedColor: Colors.black,
-                        backgroundColor: AppColors.bodyBackgroundColor,
-                        side: const BorderSide(color: Colors.black, width: 1.5),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                      ),
-                    ),
-                    )
-                .toList(),
-          ),
-        ),
-        const SizedBox(height: 20),
+      // Sort guides into categories
+      for (var doc in guides) {
+        final data = doc.data();
+        final tier = data['tier'] as String?;
+        if (tier != null && categories.contains(tier)) {
+          guideItems[tier]!.add({
+            'title': doc.id,
+            'cpu': data['cpu'] ?? '',
+            'gpu': data['gpu'] ?? '',
+            'ram': data['ram'] ?? '',
+            'price': data['price'] ?? '',
+            'cooler': data['cooler'] ?? '',
+            'case': data['case'] ?? '',
+          });
+        }
+      }
 
-       
-        Expanded(
-          child: Padding(
+      setState(() {
+        isLoading = false;
+      });
+    } catch (e) {
+      print('Error loading guides: $e');
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    String selectedCategory = categories[_selectedCategoryIndex];
+    List<Map<String, dynamic>> selectedGuides = guideItems[selectedCategory] ?? [];
+
+    return Scaffold(
+      backgroundColor: AppColors.bodyBackgroundColor,
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 50),
+          Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: ListView.builder(
-              itemCount: selectedGuides.length,
-              itemBuilder: (context, index) {
-                final guide = selectedGuides[index];
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 20),
-                  child: buildGuideCard(
-                    context: context,
-                    title: guide["title"]!,
-                    cpu: guide["cpu"]!,
-                    gpu: guide["gpu"]!,
-                    ram: guide["ram"]!,
-                    price: guide["price"]!,
-                    cooler: guide["cooler"]!,
-                    pccase: guide["case"]!,
-                  ),
-                );
-              },
+            child: Text(
+              "Guides",
+              style: appBarTitleTextStyle,
             ),
           ),
-        ),
-      ],
-    ),
-    bottomNavigationBar: CustomNavBar(),
-  );
+          const SizedBox(height: 10),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Row(
+              children: categories
+                  .asMap()
+                  .entries
+                  .map((entry) => Padding(
+                        padding: const EdgeInsets.only(right: 10),
+                        child: FilterChip(
+                          label: Text(
+                            entry.value,
+                            style: TextStyle(
+                              color: _selectedCategoryIndex == entry.key ? Colors.white : Colors.black,
+                            ),
+                          ),
+                          selected: _selectedCategoryIndex == entry.key,
+                          onSelected: (_) {
+                            setState(() {
+                              _selectedCategoryIndex = entry.key;
+                            });
+                          },
+                          selectedColor: Colors.black,
+                          backgroundColor: AppColors.bodyBackgroundColor,
+                          side: const BorderSide(color: Colors.black, width: 1.5),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                      ),
+                      )
+                  .toList(),
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          if (isLoading)
+            const Expanded(
+              child: Center(child: CircularProgressIndicator()),
+            )
+          else if (selectedGuides.isEmpty)
+            const Expanded(
+              child: Center(child: Text('No guides available for this category')),
+            )
+          else
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: ListView.builder(
+                  itemCount: selectedGuides.length,
+                  itemBuilder: (context, index) {
+                    final guide = selectedGuides[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 20),
+                      child: buildGuideCard(
+                        context: context,
+                        title: guide["title"]!,
+                        cpu: guide["cpu"]!,
+                        gpu: guide["gpu"]!,
+                        ram: guide["ram"]!,
+                        price: guide["price"]!,
+                        cooler: guide["cooler"]!,
+                        pccase: guide["case"]!,
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+        ],
+      ),
+      bottomNavigationBar: CustomNavBar(),
+    );
   }
 } 
 
@@ -217,45 +210,234 @@ Widget buildGuideCard({
   );
 }
 
-class GuidesDetailScreen extends StatelessWidget {
+class GuidesDetailScreen extends StatefulWidget {
   const GuidesDetailScreen({super.key});
+
+  @override
+  State<GuidesDetailScreen> createState() => _GuidesDetailScreenState();
+}
+
+class _GuidesDetailScreenState extends State<GuidesDetailScreen> {
+  bool isLoading = true;
+  Map<String, dynamic>? buildData;
+  bool _isFirstLoad = true;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_isFirstLoad) {
+      _loadBuildData();
+      _isFirstLoad = false;
+    }
+  }
+
+  Future<void> _loadBuildData() async {
+    final args = ModalRoute.of(context)!.settings.arguments as Map<String, String>;
+    final title = args['title']!;
+
+    try {
+      final doc = await FirebaseFirestore.instance.collection('guides').doc(title).get();
+      if (doc.exists) {
+        setState(() {
+          buildData = doc.data();
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      print('Error loading build data: $e');
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _launchUrl(String url) async {
+    if (!await launchUrl(Uri.parse(url))) {
+      throw Exception('Could not launch $url');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final args = ModalRoute.of(context)!.settings.arguments as Map<String, String>;
+
+    if (isLoading) {
+      return Scaffold(
+        backgroundColor: AppColors.bodyBackgroundColor,
+        appBar: AppBar(
+          iconTheme: const IconThemeData(color: Colors.black),
+          backgroundColor: AppColors.appBarBackgroundColor,
+          title: Text(
+            args['title']!,
+            style: const TextStyle(color: Colors.black, fontSize: 24),
+          ),
+        ),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (buildData == null) {
+      return Scaffold(
+        backgroundColor: AppColors.bodyBackgroundColor,
+        appBar: AppBar(
+          iconTheme: const IconThemeData(color: Colors.black),
+          backgroundColor: AppColors.appBarBackgroundColor,
+          title: Text(
+            args['title']!,
+            style: const TextStyle(color: Colors.black, fontSize: 24),
+          ),
+        ),
+        body: const Center(child: Text('Build data not found')),
+      );
+    }
+
     return Scaffold(
       backgroundColor: AppColors.bodyBackgroundColor,
       appBar: AppBar(
-        iconTheme: const IconThemeData(color: Colors.black) ,
+        iconTheme: const IconThemeData(color: Colors.black),
         backgroundColor: AppColors.appBarBackgroundColor,
         title: Text(
           args['title']!,
-          style:  TextStyle(color: Colors.black, fontSize: 24,),
+          style: const TextStyle(color: Colors.black, fontSize: 24),
         ),
       ),
-      body:  Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
-          
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Divider(color: Colors.black),
-            SizedBox(height: 20,),
-            Text("CPU: ${args['cpu']}", style: const TextStyle(fontSize: 18)),
-            Text("GPU: ${args['gpu']}", style: const TextStyle(fontSize: 18)),
-            Text("RAM: ${args['ram']} (3200 MHz)", style: const TextStyle(fontSize: 18)),
-            Text("Motherboard: ASUS Prime B660M-A", style: const TextStyle(fontSize: 18)),
-            Text("PSU: Corsair RM750", style: const TextStyle(fontSize: 18)),
-            Text("Case: ${args['case']}", style: const TextStyle(fontSize: 18)),
-            Text("CPU Cooler: ${args['cooler']}", style: const TextStyle(fontSize: 18)),
             const SizedBox(height: 20),
-            Text("Total Price: ${args['price']}", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 40),
+            
+            // CPU Section
+            _buildComponentSection(
+              title: 'CPU',
+              name: buildData!['cpu'] ?? args['cpu']!,
+              imageUrl: buildData!['cpu_url'],
+              buyLink: buildData!['buy_link'],
+            ),
+            
+            // GPU Section
+            _buildComponentSection(
+              title: 'GPU',
+              name: buildData!['gpu'] ?? args['gpu']!,
+              imageUrl: buildData!['gpu_url'],
+              buyLink: buildData!['buy_link'],
+            ),
+            
+            // RAM Section
+            _buildComponentSection(
+              title: 'RAM',
+              name: buildData!['ram'] ?? args['ram']!,
+              imageUrl: buildData!['ram_url'],
+              buyLink: buildData!['buy_link'],
+            ),
+            
+            // Case Section
+            _buildComponentSection(
+              title: 'Case',
+              name: buildData!['case'] ?? args['case']!,
+              imageUrl: buildData!['case_url'],
+              buyLink: buildData!['buy_link'],
+            ),
+            
+            // Cooler Section
+            _buildComponentSection(
+              title: 'CPU Cooler',
+              name: buildData!['cooler'] ?? args['cooler']!,
+              imageUrl: buildData!['cooler_url'],
+              buyLink: buildData!['buy_link'],
+            ),
+            
             const SizedBox(height: 20),
+            Text(
+              "Total Price: ${buildData!['price'] ?? args['price']!}",
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            
+            if (buildData!['buy_link'] != null) ...[
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => _launchUrl(buildData!['buy_link']),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text('Buy All Parts', style: TextStyle(fontSize: 16)),
+                ),
+              ),
+            ],
           ],
         ),
       ),
-     
+    );
+  }
+
+  Widget _buildComponentSection({
+    required String title,
+    required String name,
+    String? imageUrl,
+    String? buyLink,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 10),
+          if (imageUrl != null)
+            Center(
+              child: Container(
+                height: 200,
+                width: 200,
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.black, width: 2),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(14),
+                  child: Image.network(
+                    imageUrl,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) {
+                      print('Error loading image: $error');
+                      return const Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.broken_image, size: 50),
+                            SizedBox(height: 8),
+                            Text('Failed to load image'),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+          const SizedBox(height: 10),
+          Text(name, style: const TextStyle(fontSize: 18)),
+          const SizedBox(height: 10),
+          Divider(color: Colors.black),
+        ],
+      ),
     );
   }
 }
