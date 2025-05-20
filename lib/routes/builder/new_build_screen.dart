@@ -56,7 +56,7 @@ class _NewBuildScreenState extends State<NewBuildScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print(selectedParts);
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(

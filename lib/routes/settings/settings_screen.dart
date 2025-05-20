@@ -57,17 +57,7 @@ class SettingsScreen extends StatelessWidget {
               }
             },
           ),
-          _settingsTile(context, Icons.language, 'Language', '/language', iconColor, textColor),
-          ListTile(
-            leading: Icon(Icons.remove_red_eye, size: 28, color: iconColor),
-            title: Text('Theme', style: settingsTitle.copyWith(color: textColor)),
-            trailing: Switch(
-              value: isDark,
-              onChanged: (value) {
-                themeProvider.toggleTheme(value);
-              },
-            ),
-          ),
+          
           Divider(color: Colors.black,),
           _settingsTile(context, Icons.info, 'About', '/about', iconColor, textColor),
           FirebaseAuth.instance.currentUser != null

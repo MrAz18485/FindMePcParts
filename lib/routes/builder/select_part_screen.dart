@@ -164,6 +164,15 @@ class _SelectPartScreenState extends State<SelectPartScreen> {
         isLoading = true;
       });
       
+      // Mevcut build'den motherboard'u bul
+      Part? motherboard;
+      if (widget.selectedParts.isNotEmpty) {
+        motherboard = widget.selectedParts.firstWhere(
+          (part) => part.category.toLowerCase() == 'motherboard' && part.price > 0,
+          orElse: () => Part(name: '', category: '', price: 0, imageUrl: ''),
+        );
+      }
+
       final List<Map<String, dynamic>> partData = await _databaseService.fetchPartsByCategory(
         widget.category,
         selectedParts: widget.selectedParts,
@@ -175,6 +184,16 @@ class _SelectPartScreenState extends State<SelectPartScreen> {
             final part = PartOption.fromMap(data);
             return part;
           }).toList();
+
+          // Eğer CPU seçiliyorsa ve motherboard varsa, uyumluluk kontrolü yap
+          if (widget.category.toLowerCase() == 'processor (cpu)' && motherboard != null && motherboard.price > 0) {
+            parts = parts.where((part) {
+              final partSocket = part.attributes['socket']?.toString() ?? '';
+              final motherboardSocket = motherboard?.attributes['socket']?.toString() ?? '';
+              return partSocket == motherboardSocket;
+            }).toList();
+          }
+          
           isLoading = false;
         });
       }
@@ -272,7 +291,37 @@ class _SelectPartScreenState extends State<SelectPartScreen> {
       ),
       body: isLoading 
         ? const Center(child: CircularProgressIndicator())
-        : ListView.builder(
+        : parts.isEmpty
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.warning_amber_rounded,
+                    size: 64,
+                    color: Colors.orange,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No Compatible ${widget.category}',
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  Text(
+                    'Found!',
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ],
+              ),
+            )
+          : ListView.builder(
             padding: const EdgeInsets.all(16),
             itemCount: filteredParts.length,
             itemBuilder: (context, index) {

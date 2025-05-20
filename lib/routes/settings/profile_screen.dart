@@ -101,12 +101,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const CircleAvatar(
-                radius: 50,
-                backgroundImage: NetworkImage('https://i.pravatar.cc/150?img=3'), // Placeholder
-              ),
-              const SizedBox(height: 20),
-              Text(displayName, style: settingsBody.copyWith(fontSize: 20, fontWeight: FontWeight.bold)), // Display name
+              Text(displayName, style: settingsBody.copyWith(fontSize: 35, fontWeight: FontWeight.bold)), // Display name
             ],
           ),
           const SizedBox(height: 24),

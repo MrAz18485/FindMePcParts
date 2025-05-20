@@ -46,7 +46,6 @@ class _BuildPageState extends State<NBuildPage> {
       if (user == null) {
         print('Error: User is not authenticated');
         final List<Map<String, dynamic>> local_build_data = await _databaseService.fetchBuilds(_username);
-        print("Local builds: $local_build_data");
         
         setState(() {
           local_builds = local_build_data.map((data) => Build.fromMap(data, data["id"])).toList();
@@ -65,7 +64,7 @@ class _BuildPageState extends State<NBuildPage> {
         build_ids.add(element["id"]);
       },);
 
-      print('Fetched build ids: $build_ids');
+      print('Fetched build data: $build_ids');
       
       setState(() {
         builds = buildData.map((data) => Build.fromMap(data, data["id"])).toList();

@@ -33,20 +33,22 @@ class AboutScreen extends StatelessWidget {
         padding: AppPaddings.screen,
         children: [
           Text('App Name: PC Goblin', style: bodyTitleStyle),
+        Divider(color: Colors.black,),
+
           const SizedBox(height: 12),
           Text(
             'PC Goblin is an upcoming mobile app for the Turkey region that helps users compare PC components, track prices, and check compatibility to build their ideal PC.',
             style: bodyTextStyle,
           ),
           const SizedBox(height: 24),
-          const Divider(thickness: 1),
+          Divider(color: Colors.black,),
           const SizedBox(height: 16),
           RichText(
             text: TextSpan(
               style: bodyTextStyle,
               children: [
                 TextSpan(text: 'Build Version: ', style: bodyTextStyle),
-                TextSpan(text: '[Version Number]'),
+                TextSpan(text: '1.0'),
               ],
             ),
           ),
@@ -56,12 +58,12 @@ class AboutScreen extends StatelessWidget {
               style: bodyTextStyle,
               children: [
                 TextSpan(text: 'Creators: ', style: bodyTextStyle),
-                TextSpan(text: '[Creator Names or Team Name]'),
+                TextSpan(text: 'Goblin Gang'),
               ],
             ),
           ),
           const SizedBox(height: 16),
-          const Divider(thickness: 1),
+          Divider(color: Colors.black,),
         ],
       ),)
     );

@@ -18,7 +18,7 @@ import 'package:flutter/material.dart';
 import 'routes/settings/settings_screen.dart';
 import 'routes/settings/profile_screen.dart';
 import 'routes/settings/change_details_screen.dart';
-import 'routes/settings/language_screen.dart';
+
 import 'routes/settings/about_screen.dart';
 
 import 'package:provider/provider.dart';
@@ -43,6 +43,7 @@ class MainApp extends StatelessWidget {
   {
     final auth = Provider.of<AuthService>(context);
     return MaterialApp(
+      debugShowCheckedModeBanner: false, // ← bu satırı ekle
       initialRoute: '/splash',
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
@@ -57,7 +58,7 @@ class MainApp extends StatelessWidget {
         '/profile': (context) => const ProfileScreen(),
         '/changeDetails': (context) => const ChangeDetailsScreen(),
         '/about': (context) => const AboutScreen(),
-        '/language': (context) => const LanguageScreen(),
+
         '/builder': (context) =>  const NBuildPage(),
         '/forgotpassword': (context) => ForgotPasswordScreen(),
         

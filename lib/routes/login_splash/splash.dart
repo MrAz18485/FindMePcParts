@@ -8,17 +8,15 @@ class SplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final auth = Provider.of<AuthService>(context);
+    final auth = Provider.of<AuthService>(context, listen: false);
+
     Future.delayed(const Duration(seconds: 2), () {
-      print("Called build");
-      print(auth.currentUser?.uid); // returns null when user is not logged in. For debugging
-      if (auth.currentUser == null)
-      {
-        Navigator.pushReplacementNamed(context, '/welcome');
-      }
-      else
-      {
+      print("Splash → Current user: ${auth.currentUser?.uid}");
+
+      if (auth.currentUser != null) {
         Navigator.pushReplacementNamed(context, "/builder");
+      } else {
+        Navigator.pushReplacementNamed(context, "/welcome");
       }
     });
 
