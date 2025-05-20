@@ -65,7 +65,7 @@ class _BuildPageState extends State<NBuildPage> {
         build_ids.add(element["id"]);
       },);
 
-      print('Fetched build data: $build_ids');
+      print('Fetched build ids: $build_ids');
       
       setState(() {
         builds = buildData.map((data) => Build.fromMap(data, data["id"])).toList();
