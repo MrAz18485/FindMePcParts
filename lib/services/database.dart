@@ -498,192 +498,216 @@ else if (category.toLowerCase() == 'motherboard' && selectedParts != null)  {
         }
     // GPU bringer
 else if (category.toLowerCase() == 'gpu' && selectedParts != null) {
-      QuerySnapshot? wattageFilteredQs;
-      double sum = 0;
-      
-      // Varsa işlemci gücünü ekle
-      if (selectedParts[0].price > 0) {
-        String? tdpStr = selectedParts[0].attributes['tdp']; // örneğin: "125 W"
-        double tdp = double.tryParse(tdpStr?.split(' ').first ?? '0') ?? 0;
-        sum += tdp;
-      }
-      
-      // PSU'den küçük olmalı uyumluluğu kontrolü
-      if (selectedParts[6].price > 0) {
-        String? wattStr = selectedParts[6].attributes['wattage'];
-        int watt = 0;
-        
-        if (wattStr != null && wattStr.contains(' ')) {
-          watt = int.tryParse(wattStr.split(' ')[0]) ?? 0;
-          
-          // Tüm dokümanları çek
-          wattageFilteredQs = await FirebaseFirestore.instance
-            .collection(collectionName)
-            .get();
-          
-          // Filtrelemeyi client-side (Dart tarafında) yap
-          final compatibleDocs = wattageFilteredQs.docs.where((doc) {
-            final tdpStr = doc['tdp']; // örnek: "300 W"
-            final tdpInt = int.tryParse(tdpStr.toString().split(' ')[0]) ?? 0;
-            return tdpInt + sum < (watt * 0.8);
-          }).toList();
-          
-          if (compatibleDocs.isEmpty) {
-            return [];
-          }
-        }
-      }
-      
-      // Sadece PSU filtresi varsa
-      if (wattageFilteredQs != null) {
-        return wattageFilteredQs.docs.map((doc) {
-          Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-          data['id'] = doc.id;
-          data['category'] = category;
-          return data;
-        }).toList();
-      }
-      
-      // Hiçbir filtre yoksa tüm GPU'ları getir
-      return qs.docs.map((doc) {
-        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-        data['id'] = doc.id;
-        data['category'] = category;
-        return data;
-      }).toList();
-      }
-
-    // Memory bringer
-else if (category.toLowerCase() == 'memory' && selectedParts != null) {
-      QuerySnapshot? motherboardFilteredQs;
-      
-      // DDR CHECK uyumluluğu kontrolü
-      if (selectedParts[2].price > 0) {
-        String? memory = selectedParts[2].attributes['memory_type'];
-        
-        if (memory != null && memory.contains(' ')) {
-          
-          // Tüm dokümanları çek
-          motherboardFilteredQs = await FirebaseFirestore.instance
-            .collection(collectionName)
-            .get();
-          
-          // Filtrelemeyi client-side (Dart tarafında) yap
-          final compatibleDocs = motherboardFilteredQs.docs.where((doc) {
-            return memory == doc['speed'].split('-')[0];
-          }).toList();
-          
-          if (compatibleDocs.isEmpty) {
-            return [];
-          }
-        }
-      }
-      
-      // Sadece motherboard filtresi varsa
-      if (motherboardFilteredQs != null) {
-        return motherboardFilteredQs.docs.map((doc) {
-          Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-          data['id'] = doc.id;
-          data['category'] = category;
-          return data;
-        }).toList();
-      }
-      
-      // Hiçbir filtre yoksa tüm RAM'leri getir
-      return qs.docs.map((doc) {
-        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-        data['id'] = doc.id;
-        data['category'] = category;
-        return data;
-      }).toList();
-    }
-
-    // PSU bringer
-else if (category.toLowerCase() == 'power supply' && selectedParts != null) {
-      QuerySnapshot? wattageFilteredQs;
-      double sum = 0;
-      
-      // Varsa işlemci gücünü ekle
-      if (selectedParts[0].price > 0) {
-        String? tdpStr = selectedParts[0].attributes['tdp']; // örneğin: "125 W"
-        double tdp = double.tryParse(tdpStr?.split(' ').first ?? '0') ?? 0;
-        sum += tdp;
-      }
-
-      // Varsa gpu gücünü ekle
-      if (selectedParts[3].price > 0) {
-        String? tdpStr = selectedParts[3].attributes['tdp']; // örneğin: "125 W"
-        double tdp = double.tryParse(tdpStr?.split(' ').first ?? '0') ?? 0;
-        sum += tdp;
-      }
+  QuerySnapshot? wattageFilteredQs;
+  List<QueryDocumentSnapshot>? compatibleDocs;
+  double sum = 0;
+  
+  // Varsa işlemci gücünü ekle
+  if (selectedParts[0].price > 0) {
+    String? tdpStr = selectedParts[0].attributes['tdp']; // örn: "125 W"
+    double tdp = double.tryParse(tdpStr?.split(' ').first ?? '0') ?? 0;
+    sum += tdp;
+  }
+  
+  // PSU'den küçük olmalı uyumluluğu kontrolü
+  if (selectedParts[6].price > 0) {
+    String? wattStr = selectedParts[6].attributes['wattage'];
+    int watt = 0;
+    
+    if (wattStr != null && wattStr.contains(' ')) {
+      watt = int.tryParse(wattStr.split(' ')[0]) ?? 0;
       
       // Tüm dokümanları çek
       wattageFilteredQs = await FirebaseFirestore.instance
+        .collection(collectionName)
+        .get();
+      
+      // Filtrelemeyi client-side (Dart tarafında) yap
+      compatibleDocs = wattageFilteredQs.docs.where((doc) {
+        final tdpStr = doc['tdp']; // örn: "300 W"
+        final tdpInt = int.tryParse(tdpStr.toString().split(' ')[0]) ?? 0;
+        return (tdpInt + sum) < (watt * 0.8);
+      }).toList();
+      
+      if (compatibleDocs.isEmpty) {
+        return [];
+      }
+    }
+  }
+  
+  // Eğer compatibleDocs varsa onları döndür
+  if (compatibleDocs != null) {
+    return compatibleDocs.map((doc) {
+      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+      data['id'] = doc.id;
+      data['category'] = category;
+      return data;
+    }).toList();
+  }
+  
+  // Hiçbir filtre yoksa tüm GPU'ları getir
+  return qs.docs.map((doc) {
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+    data['id'] = doc.id;
+    data['category'] = category;
+    return data;
+  }).toList();
+}
+
+    // Memory bringer
+else if (category.toLowerCase() == 'memory' && selectedParts != null) {
+  QuerySnapshot? motherboardFilteredQs;
+  List<QueryDocumentSnapshot>? compatibleDocs;
+
+  if (selectedParts[2].price > 0) {
+    String? memory = selectedParts[2].attributes['memory_type'];
+
+
+    if (memory != null) {
+      motherboardFilteredQs = await FirebaseFirestore.instance
           .collection(collectionName)
           .get();
-      
-      // Filtreleme yapılacaksa
-      if (sum > 0) {
-        // Filtrelemeyi client-side (Dart tarafında) yap
-        final compatibleDocs = wattageFilteredQs.docs.where((doc) {
-          final wattStr = doc['wattage']; // örnek: "750 W"
-          final wattInt = int.tryParse(wattStr.toString().split(' ')[0]) ?? 0;
-          return wattInt >= (sum * 1.25); // PSU gücü toplam güçten %25 fazla olmalı
-        }).toList();
-        
-        if (compatibleDocs.isEmpty) {
-          return [];
-        }
 
-        return compatibleDocs.map((doc) {
-          Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-          data['id'] = doc.id;
-          data['category'] = category;
-          return data;
-        }).toList();
-      }
-      
-      // Hiçbir filtre yoksa tüm PSU'ları getir
-      return wattageFilteredQs.docs.map((doc) {
-        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-        data['id'] = doc.id;
-        data['category'] = category;
-        return data;
+      compatibleDocs = motherboardFilteredQs.docs.where((doc) {
+
+
+        return (doc['speed'].split('-')[0] == memory);
       }).toList();
+
+
+      if (compatibleDocs.isEmpty) {
+ 
+        return [];
+      }
+    }
+  }
+
+  if (compatibleDocs != null) {
+    return compatibleDocs.map((doc) {
+      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+      data['id'] = doc.id;
+      data['category'] = category;
+      return data;
+    }).toList();
+  }
+
+  // Eğer filtre yoksa tüm RAM'leri getir
+  return qs.docs.map((doc) {
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+    data['id'] = doc.id;
+    data['category'] = category;
+    return data;
+  }).toList();
+}
+
+// PSU bringer
+else if (category.toLowerCase() == 'power supply' && selectedParts != null) {
+  QuerySnapshot? wattageFilteredQs;
+  double sum = 0;
+
+  // İşlemci gücünü ekle
+  if (selectedParts[0].price > 0) {
+    String? tdpStr = selectedParts[0].attributes['tdp']; // örneğin: "125 W"
+    double tdp = double.tryParse(tdpStr?.split(' ').first ?? '0') ?? 0;
+    sum += tdp;
+  }
+
+  // GPU gücünü ekle
+  if (selectedParts[3].price > 0) {
+    String? tdpStr = selectedParts[3].attributes['tdp']; // örneğin: "125 W"
+    double tdp = double.tryParse(tdpStr?.split(' ').first ?? '0') ?? 0;
+    sum += tdp;
+  }
+
+  // Tüm dokümanları çek
+  wattageFilteredQs = await FirebaseFirestore.instance
+      .collection(collectionName)
+      .get();
+
+  if (sum > 0) {
+    // Filtreleme
+    final compatibleDocs = wattageFilteredQs.docs.where((doc) {
+      final wattStr = doc['wattage']; // örn: "750 W"
+      final wattInt = int.tryParse(wattStr.toString().split(' ')[0]) ?? 0;
+      return wattInt >= (sum * 1.25); // PSU gücü toplam güçten %25 fazla olmalı
+    }).toList();
+
+    if (compatibleDocs.isEmpty) {
+      return [];
     }
 
-    // Case bringer
+    // Filtrelenmiş PSU'ları dön
+    return compatibleDocs.map((doc) {
+      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+      data['id'] = doc.id;
+      data['category'] = category;
+      return data;
+    }).toList();
+  }
+
+  // Filtre yoksa tüm PSU'ları dön
+  return wattageFilteredQs.docs.map((doc) {
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+    data['id'] = doc.id;
+    data['category'] = category;
+    return data;
+  }).toList();
+}
+
+// Case bringer
 else if (category.toLowerCase() == 'case' && selectedParts != null) {
-      List<QueryDocumentSnapshot>? mbFilteredDocs;
-      
-      // Motherboard uyumluluğu kontrolü
-      if (selectedParts[2].price > 0) {
-        String motherboardForm = selectedParts[2].attributes['form_factor'] ?? '';
-        if (motherboardForm.isNotEmpty) {
-          // Önce tüm kasaları al
-          final allCases = await FirebaseFirestore.instance.collection(collectionName).get();
-          
-          // Motherboard form factor'üne uyumlu olanları filtrele
-          mbFilteredDocs = allCases.docs.where((doc) {
-            final data = doc.data();
-            final supportedSockets = List<String>.from(data['motherboard_form_factor'] ?? []);
-            return supportedSockets.contains(motherboardForm);
-          }).toList();
-          
-          if (mbFilteredDocs.isEmpty) {
-            return [];
-          }
-        }
-      }
+  List<QueryDocumentSnapshot>? mbFilteredDocs;
 
-      // Hiçbir filtre yoksa tüm kasaları getir
-      return qs.docs.map((doc) {
-        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-        data['id'] = doc.id;
-        data['category'] = category;
-        return data;
+  // Motherboard uyumluluğu kontrolü
+// Motherboard uyumluluğu kontrolü
+  if (selectedParts[2].price > 0) {
+    String motherboardForm = selectedParts[2].attributes['form_factor'] ?? '';
+    if (motherboardForm.isNotEmpty) {
+      // Önce tüm kasaları al
+      final allCases = await FirebaseFirestore.instance.collection(collectionName).get();
+
+      // Motherboard form factor'üne uyumlu olanları filtrele
+      mbFilteredDocs = allCases.docs.where((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        final formFactorData = data['motherboard_form_factor'];
+
+        List<String> supportedFormFactors;
+        if (formFactorData is String) {
+          supportedFormFactors = [formFactorData];
+        } else if (formFactorData is Iterable) {
+          supportedFormFactors = List<String>.from(formFactorData);
+        } else {
+          supportedFormFactors = [];
+        }
+
+        print(supportedFormFactors);
+        return supportedFormFactors.contains(motherboardForm);
       }).toList();
+
+      if (mbFilteredDocs.isEmpty) {
+        return [];
+      }
     }
+  }
+
+  // Eğer filtreli liste varsa onu döndür
+  if (mbFilteredDocs != null) {
+    return mbFilteredDocs.map((doc) {
+      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+      data['id'] = doc.id;
+      data['category'] = category;
+      return data;
+    }).toList();
+  }
+
+  // Filtre yoksa tüm kasaları getir
+  return qs.docs.map((doc) {
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+    data['id'] = doc.id;
+    data['category'] = category;
+    return data;
+  }).toList();
+}
 
     // Hiçbir kategori eşleşmezse tüm parçaları getir
     return qs.docs.map((doc) {

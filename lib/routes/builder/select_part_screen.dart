@@ -303,7 +303,15 @@ class _SelectPartScreenState extends State<SelectPartScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'No Compatible ${widget.category} Found!',
+                    'No Compatible ${widget.category}',
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  Text(
+                    'Found!',
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w600,
