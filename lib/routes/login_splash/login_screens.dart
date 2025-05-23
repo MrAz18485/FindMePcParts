@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:findmepcparts/util/colors.dart';
 import 'package:findmepcparts/util/text_styles.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -306,6 +307,32 @@ class ProfileSetupScreen extends StatelessWidget {
                 ),
                 onPressed: () async {
                   if (formKey.currentState!.validate()) {
+                        // Username existence check
+                      final username = usernamecontroller.text.trim();
+
+                      final existing = await FirebaseFirestore.instance
+                          .collection('users')
+                          .where('username', isEqualTo: username)
+                          .limit(1)
+                          .get();
+
+                      if (existing.docs.isNotEmpty) {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            backgroundColor: Colors.white,
+                            title: const Text("Error"),
+                            content: const Text("The username you entered is already in use. Please choose another."),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text("OK", style: TextStyle(color: Colors.black)),
+                              ),
+                            ],
+                          ),
+                        );
+                        return;
+                      }
                     dynamic result = await _auth.registerEmailPass(
                       emailController.text,
                       passwordController.text,

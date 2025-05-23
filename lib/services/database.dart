@@ -272,100 +272,61 @@ if (category.toLowerCase() == 'cpu cooler' && selectedParts != null) {
     
    // CPU bringer
 else if (category.toLowerCase() == 'processor (cpu)' && selectedParts != null) {
-      List<QueryDocumentSnapshot>? coolerFilteredDocs;
-      List<QueryDocumentSnapshot>? mbFilteredDocs;
-      
-      // Cooler uyumluluğu kontrolü
-      if (selectedParts[1].price > 0) {
-        List<String> coolerSockets = List<String>.from(selectedParts[1].attributes['cpu_socket'] ?? []);
-        if (coolerSockets.isNotEmpty) {
-          // Önce tüm CPU'ları al
-          final allCPUs = await FirebaseFirestore.instance.collection(collectionName).get();
-          
-          // Cooler socket'lerine uyumlu olanları filtrele
-          coolerFilteredDocs = allCPUs.docs.where((doc) {
-            final data = doc.data();
-            final socket = data['socket'] ?? '';
-            return coolerSockets.contains(socket);
-          }).toList();
-          
-          if (coolerFilteredDocs.isEmpty) {
-            return [];
-          }
-        }
-      }
-      
-      // Motherboard uyumluluğu kontrolü
-      if (selectedParts[2].price > 0) {
-        String motherboardSocket = selectedParts[2].attributes['socket'] ?? '';
-        if (motherboardSocket.isNotEmpty) {
-          // Önce tüm CPU'ları al
-          final allCPUs = await FirebaseFirestore.instance.collection(collectionName).get();
-          
-          // Motherboard socket'ine uyumlu olanları filtrele
-          mbFilteredDocs = allCPUs.docs.where((doc) {
-            final data = doc.data();
-            final socket = data['socket'] ?? '';
-            return socket == motherboardSocket;
-          }).toList();
-          
-          if (mbFilteredDocs.isEmpty) {
-            return [];
-          }
-        }
-      }
+  final allCPUsSnapshot = await FirebaseFirestore.instance.collection(collectionName).get();
+  final allCPUsDocs = allCPUsSnapshot.docs;
 
-      // Her iki filtreleme de yapıldıysa, kesişim kümesini bul
-      if (coolerFilteredDocs != null && mbFilteredDocs != null) {
-        final coolerIds = coolerFilteredDocs.map((doc) => doc.id).toSet();
-        final mbIds = mbFilteredDocs.map((doc) => doc.id).toSet();
-        
-        // Her iki kümede de olan ID'leri bul
-        final commonIds = coolerIds.intersection(mbIds);
-        
-        if (commonIds.isEmpty) {
-          return [];
-        }
+  Set<String>? commonIds;
 
-        // Ortak ID'lere sahip dokümanları al
-        final filtered = coolerFilteredDocs.where((doc) => commonIds.contains(doc.id)).toList();
-        
-        return filtered.map((doc) {
-          Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-          data['id'] = doc.id;
-          data['category'] = category;
-          return data;
-        }).toList();
-      }
-      
-      // Sadece Cooler filtresi varsa
-      if (coolerFilteredDocs != null) {
-        return coolerFilteredDocs.map((doc) {
-          Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-          data['id'] = doc.id;
-          data['category'] = category;
-          return data;
-        }).toList();
-      }
-      
-      // Sadece motherboard filtresi varsa
-      if (mbFilteredDocs != null) {
-        return mbFilteredDocs.map((doc) {
-          Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-          data['id'] = doc.id;
-          data['category'] = category;
-          return data;
-        }).toList();
-      }
-
-      // Hiçbir filtre yoksa tüm CPU'ları getir
-      return qs.docs.map((doc) {
-        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-        data['id'] = doc.id;
-        data['category'] = category;
-        return data;
-      }).toList();
+  // PSU filtresi
+  if (selectedParts[6].price > 0) {
+    double wattage = double.tryParse((selectedParts[6].attributes['wattage'] ?? '0').split(' ').first) ?? 0;
+    wattage *= 0.8;
+    if (selectedParts[3].price > 0) {
+      wattage -= double.tryParse((selectedParts[3].attributes['tdp'] ?? '0').split(' ').first) ?? 0;
     }
+    final psuIds = allCPUsDocs.where((doc) {
+      final tdp = double.tryParse((doc['tdp'] ?? '0').toString().split(' ').first) ?? 0;
+      return tdp <= wattage;
+    }).map((doc) => doc.id).toSet();
+    commonIds = psuIds;
+  }
+
+  // Cooler filtresi
+  if (selectedParts[1].price > 0) {
+    final coolerSockets = List<String>.from(selectedParts[1].attributes['cpu_socket'] ?? []);
+    final coolerIds = allCPUsDocs.where((doc) {
+      return coolerSockets.contains(doc['socket'] ?? '');
+    }).map((doc) => doc.id).toSet();
+    commonIds = commonIds?.intersection(coolerIds) ?? coolerIds;
+  }
+
+  // Motherboard filtresi
+  if (selectedParts[2].price > 0) {
+    final mbSocket = selectedParts[2].attributes['socket'] ?? '';
+    final mbIds = allCPUsDocs.where((doc) {
+      return doc['socket'] == mbSocket;
+    }).map((doc) => doc.id).toSet();
+    commonIds = commonIds?.intersection(mbIds) ?? mbIds;
+  }
+
+  if (commonIds == null) {
+    return allCPUsDocs.map((doc) {
+      final data = doc.data() as Map<String, dynamic>;
+      data['id'] = doc.id;
+      data['category'] = category;
+      return data;
+    }).toList();
+  }
+
+  if (commonIds.isEmpty) return [];
+
+  return allCPUsDocs.where((doc) => commonIds!.contains(doc.id)).map((doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    data['id'] = doc.id;
+    data['category'] = category;
+    return data;
+  }).toList();
+}
 
     // Motherboard Bringer
 else if (category.toLowerCase() == 'motherboard' && selectedParts != null)  {
