@@ -20,7 +20,6 @@
   - Informs the user when there’s incompatibility between parts.  
   - Has a built-in forum where users can discuss new computer parts and their experiences.  
   - Supports advanced sorting & filtering options.  
-  - Capable of giving information about the performance of the builds made by the user with the help of embedded AI  
   - Comes with an easy-to-navigate UI and user-friendly UX  
   - Supports Turkey region  
   - Language support for Turkish & English
